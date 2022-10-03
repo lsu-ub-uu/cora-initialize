@@ -51,5 +51,9 @@ public class ModuleInitializer {
 	void onlyForTestSetStarter(ModuleStarter starter) {
 		this.starter = starter;
 	}
+	// TODO: rename to getOneImplementation
+	// TODO: add second method getOnlyImplementation
+	// TODO: should only find and start implementations of factory once
+	// TODO:etc.. :)
 
 }
