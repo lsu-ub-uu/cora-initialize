@@ -31,6 +31,7 @@ import se.uu.ub.cora.initialize.internal.InterfaceClassSpy;
 import se.uu.ub.cora.initialize.internal.ModuleStarter;
 import se.uu.ub.cora.initialize.internal.ModuleStarterImp;
 import se.uu.ub.cora.initialize.internal.ModuleStarterSpy;
+import se.uu.ub.cora.initialize.internal.SelectOrderSpy;
 import se.uu.ub.cora.logger.LoggerProvider;
 import se.uu.ub.cora.testspies.logger.LoggerFactorySpy;
 import se.uu.ub.cora.testspies.logger.LoggerSpy;
@@ -48,20 +49,20 @@ public class ModuleInitializerTest {
 		loggerFactorySpy = new LoggerFactorySpy();
 		LoggerProvider.setLoggerFactory(loggerFactorySpy);
 		factoryClass = InterfaceClassSpy.class;
-	}
 
-	private void start() {
 		initializer = new ModuleInitializer();
+		loggerSpy = (LoggerSpy) loggerFactorySpy.MCR.getReturnValue("factorForClass", 0);
 		starter = new ModuleStarterSpy();
 		initializer.onlyForTestSetStarter(starter);
-		initializer.loadImplementation(factoryClass);
-
-		loggerSpy = (LoggerSpy) loggerFactorySpy.MCR.getReturnValue("factorForClass", 0);
+		starter.MRV.setDefaultReturnValuesSupplier(
+				"getImplementationBasedOnSelectOrderThrowErrorIfNone", InterfaceClassSpy::new);
+		starter.MRV.setDefaultReturnValuesSupplier("getImplementationThrowErrorIfNoneOrMoreThanOne",
+				SelectOrderSpy::new);
 	}
 
 	@Test
-	public void testLogMessagesOnStartup() throws Exception {
-		start();
+	public void testLogMessagesOnStartup_selectOrder() throws Exception {
+		initializer.loadOneImplementationBySelectOrder(factoryClass);
 
 		String simpleName = factoryClass.getSimpleName();
 		loggerSpy.MCR.assertParameters("logInfoUsingMessage", 0,
@@ -72,9 +73,11 @@ public class ModuleInitializerTest {
 	}
 
 	@Test
-	public void testRecordStorageProviderImplementationsArePassedOnToStarter() {
-		start();
+	public void testRecordStorageProviderImplementationsArePassedOnToStarter_selectOrder() {
+		InterfaceClassSpy loadedImpl = initializer.loadOneImplementationBySelectOrder(factoryClass);
 
+		starter.MCR.assertReturn("getImplementationBasedOnSelectOrderThrowErrorIfNone", 0,
+				loadedImpl);
 		String methodName = "getImplementationBasedOnSelectOrderThrowErrorIfNone";
 		starter.MCR.assertParameters(methodName, 0);
 		ServiceLoader<?> implementations = (ServiceLoader<?>) starter.MCR
@@ -88,10 +91,23 @@ public class ModuleInitializerTest {
 	}
 
 	@Test
+	public void testLogMessagesOnStartup_oneImplementation() throws Exception {
+		initializer.loadOnlyExistingImplementation(factoryClass);
+
+		String simpleName = factoryClass.getSimpleName();
+		loggerSpy.MCR.assertParameters("logInfoUsingMessage", 0,
+				"ModuleInitializer start loading implementation of: " + simpleName + "...");
+
+		loggerSpy.MCR.assertParameters("logInfoUsingMessage", 1,
+				"...moduleInitializer finished loading implementation of: " + simpleName);
+	}
+
+	@Test
 	public void testInitUsesDefaultModuleStarter() throws Exception {
-		start();
 		initializer = new ModuleInitializer();
+
 		ModuleStarterImp starter = (ModuleStarterImp) initializer.onlyForTestGetStarter();
+
 		assertStarterIsModuleStarter(starter);
 	}
 

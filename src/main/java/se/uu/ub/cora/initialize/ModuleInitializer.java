@@ -1,7 +1,6 @@
 /*
  * Copyright 2019 Olov McKie
  * Copyright 2019, 2022 Uppsala University Library
- * 
  *
  * This file is part of Cora.
  *
@@ -26,22 +25,44 @@ import se.uu.ub.cora.initialize.internal.ModuleStarter;
 import se.uu.ub.cora.initialize.internal.ModuleStarterImp;
 import se.uu.ub.cora.logger.Logger;
 import se.uu.ub.cora.logger.LoggerProvider;
-//import se.uu.ub.cora.storage.RecordStorageProvider;
 
+/**
+ * ModuleInitializer is intended to be used by different providers as a help to find the (factory)
+ * classes that implement the functionality they need with the help of javas module system. It
+ * provied two functions depending on if the implementation is expected to only exist once or if it
+ * is expected that there will be more than one implementation available.
+ * </p>
+ * There is a method {@link #onlyForTestSetStarter(ModuleStarter)} that makes it possible to change
+ * the starter to enable easier testing.
+ */
 public class ModuleInitializer {
 	private Logger log = LoggerProvider.getLoggerForClass(ModuleInitializer.class);
 	private ModuleStarter starter = new ModuleStarterImp();
 
-	public <T extends SelectOrder> T loadImplementation(Class<T> factoryClass) {
+	/**
+	 * @throws InitializationException
+	 *             if no implementations can be found
+	 * @param <T>
+	 * @param factoryClass
+	 * @return
+	 */
+	public <T extends SelectOrder> T loadOneImplementationBySelectOrder(Class<T> factoryClass) {
 		String nameOfClass = factoryClass.getSimpleName();
+		logStartMessage(nameOfClass);
+		T loadedImpl = starter.getImplementationBasedOnSelectOrderThrowErrorIfNone(
+				ServiceLoader.load(factoryClass), nameOfClass);
+		logFinishedMessage(nameOfClass);
+		return loadedImpl;
+	}
+
+	private void logStartMessage(String nameOfClass) {
 		log.logInfoUsingMessage(
 				"ModuleInitializer start loading implementation of: " + nameOfClass + "...");
+	}
 
-		starter.getImplementationBasedOnSelectOrderThrowErrorIfNone(
-				ServiceLoader.load(factoryClass), nameOfClass);
+	private void logFinishedMessage(String nameOfClass) {
 		log.logInfoUsingMessage(
 				"...moduleInitializer finished loading implementation of: " + nameOfClass);
-		return null;
 	}
 
 	ModuleStarter onlyForTestGetStarter() {
@@ -51,9 +72,17 @@ public class ModuleInitializer {
 	void onlyForTestSetStarter(ModuleStarter starter) {
 		this.starter = starter;
 	}
-	// TODO: rename to getOneImplementation
-	// TODO: add second method getOnlyImplementation
+	// TODO: rename to loadOneImplementationBySelectOrder
+	// TODO: add second method loadOnlyExistingImplementation
 	// TODO: should only find and start implementations of factory once
 	// TODO:etc.. :)
+
+	public <T extends Object> void loadOnlyExistingImplementation(Class<T> factoryClass) {
+		String nameOfClass = factoryClass.getSimpleName();
+		logStartMessage(nameOfClass);
+		logFinishedMessage(nameOfClass);
+		// TODO Auto-generated method stub
+
+	}
 
 }
