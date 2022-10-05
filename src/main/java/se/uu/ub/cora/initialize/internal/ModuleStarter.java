@@ -20,31 +20,37 @@ package se.uu.ub.cora.initialize.internal;
 
 import java.util.ServiceLoader;
 
-import se.uu.ub.cora.initialize.ModuleInitializer;
+import se.uu.ub.cora.initialize.InitializationException;
+import se.uu.ub.cora.initialize.ModuleInitializerImp;
 import se.uu.ub.cora.initialize.SelectOrder;
 
 /**
- * 
- * ModuleStarter is an interface used by {@link ModuleInitializer} to split the part using
- * {@link ServiceLoader} from the part choosing implementations. This split helps in testing. This
- * internal interface not intended to be used outside of this module.
+ * ModuleStarter handles implementations found by {@link ModuleInitializerImp}. It helps to split the
+ * part using {@link ServiceLoader} from the part choosing implementations. This split helps in
+ * testing.
  */
 public interface ModuleStarter {
 	/**
+	 * getImplementationBasedOnSelectOrderThrowErrorIfNone
 	 * 
 	 * @param <T>
 	 * @param implementations
 	 * @param interfaceClassName
+	 * @throws InitializationException
+	 *             if no implementations can be found
 	 * @return
 	 */
 	<T extends SelectOrder> T getImplementationBasedOnSelectOrderThrowErrorIfNone(
 			Iterable<T> implementations, String interfaceClassName);
 
 	/**
+	 * getImplementationThrowErrorIfNoneOrMoreThanOne
 	 * 
 	 * @param <T>
 	 * @param implementations
 	 * @param interfaceClassName
+	 * @throws InitializationException
+	 *             if no implementations can be found
 	 * @return
 	 */
 	<T extends Object> T getImplementationThrowErrorIfNoneOrMoreThanOne(Iterable<T> implementations,

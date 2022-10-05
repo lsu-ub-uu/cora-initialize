@@ -1,6 +1,5 @@
 /*
- * Copyright 2019 Olov McKie
- * Copyright 2019, 2022 Uppsala University Library
+ * Copyright 2022 Uppsala University Library
  *
  * This file is part of Cora.
  *
@@ -19,70 +18,51 @@
  */
 package se.uu.ub.cora.initialize;
 
-import java.util.ServiceLoader;
-
 import se.uu.ub.cora.initialize.internal.ModuleStarter;
-import se.uu.ub.cora.initialize.internal.ModuleStarterImp;
-import se.uu.ub.cora.logger.Logger;
-import se.uu.ub.cora.logger.LoggerProvider;
 
 /**
- * ModuleInitializer is intended to be used by different providers as a help to find the (factory)
- * classes that implement the functionality they need with the help of javas module system. It
- * provied two functions depending on if the implementation is expected to only exist once or if it
- * is expected that there will be more than one implementation available.
+ * ModuleInitializer is intended to be used by different providers in order to find the (factory)
+ * classes that implement the functionality they need with the help of javas module system. This
+ * class provides two functions that can be used depending on how many implementations we expect to
+ * find:
+ * <ol>
+ * <li>for one use {@link #loadTheOnlyExistingImplementation(Class)}</li>
+ * <li>for more than one use {@link #loadOneImplementationBySelectOrder(Class)}</li>
+ * </ol>
  * </p>
  * There is a method {@link #onlyForTestSetStarter(ModuleStarter)} that makes it possible to change
  * the starter to enable easier testing.
+ * 
  */
-public class ModuleInitializer {
-	private Logger log = LoggerProvider.getLoggerForClass(ModuleInitializer.class);
-	private ModuleStarter starter = new ModuleStarterImp();
+public interface ModuleInitializer {
 
 	/**
-	 * @throws InitializationException
-	 *             if no implementations can be found
+	 * loadOneImplementationBySelectOrder uses javas module system to find and return an
+	 * implementation of the specified factoryClass.
+	 * </p>
+	 * If no implementations can be found MUST an @throws InitializationException be thrown
+	 * 
 	 * @param <T>
+	 *            A found implementation of the specified factoryClass
 	 * @param factoryClass
-	 * @return
+	 *            A Class to find
+	 * @return An instance of the specified factoryClass
 	 */
-	public <T extends SelectOrder> T loadOneImplementationBySelectOrder(Class<T> factoryClass) {
-		String nameOfClass = factoryClass.getSimpleName();
-		logStartMessage(nameOfClass);
-		T loadedImpl = starter.getImplementationBasedOnSelectOrderThrowErrorIfNone(
-				ServiceLoader.load(factoryClass), nameOfClass);
-		logFinishedMessage(nameOfClass);
-		return loadedImpl;
-	}
+	<T extends SelectOrder> T loadOneImplementationBySelectOrder(Class<T> factoryClass);
 
-	private void logStartMessage(String nameOfClass) {
-		log.logInfoUsingMessage(
-				"ModuleInitializer start loading implementation of: " + nameOfClass + "...");
-	}
-
-	private void logFinishedMessage(String nameOfClass) {
-		log.logInfoUsingMessage(
-				"...moduleInitializer finished loading implementation of: " + nameOfClass);
-	}
-
-	ModuleStarter onlyForTestGetStarter() {
-		return starter;
-	}
-
-	void onlyForTestSetStarter(ModuleStarter starter) {
-		this.starter = starter;
-	}
-	// TODO: rename to loadOneImplementationBySelectOrder
-	// TODO: add second method loadOnlyExistingImplementation
-	// TODO: should only find and start implementations of factory once
-	// TODO:etc.. :)
-
-	public <T extends Object> void loadOnlyExistingImplementation(Class<T> factoryClass) {
-		String nameOfClass = factoryClass.getSimpleName();
-		logStartMessage(nameOfClass);
-		logFinishedMessage(nameOfClass);
-		// TODO Auto-generated method stub
-
-	}
+	/**
+	 * loadTheOnlyExistingImplementation uses javas module system to find and return an
+	 * implementation of the specified factoryClass.
+	 * 
+	 * If none or more than one implementation is found MUST an @throws InitializationException be
+	 * thrown
+	 * 
+	 * @param <T>
+	 *            A found implementation of the specified factoryClass
+	 * @param factoryClass
+	 *            A Class to find
+	 * @return An instance of the specified factoryClass
+	 */
+	<T extends Object> T loadTheOnlyExistingImplementation(Class<T> factoryClass);
 
 }

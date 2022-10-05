@@ -31,13 +31,12 @@ import se.uu.ub.cora.initialize.internal.InterfaceClassSpy;
 import se.uu.ub.cora.initialize.internal.ModuleStarter;
 import se.uu.ub.cora.initialize.internal.ModuleStarterImp;
 import se.uu.ub.cora.initialize.internal.ModuleStarterSpy;
-import se.uu.ub.cora.initialize.internal.SelectOrderSpy;
 import se.uu.ub.cora.logger.LoggerProvider;
 import se.uu.ub.cora.testspies.logger.LoggerFactorySpy;
 import se.uu.ub.cora.testspies.logger.LoggerSpy;
 
 public class ModuleInitializerTest {
-	private ModuleInitializer initializer;
+	private ModuleInitializerImp initializer;
 	private LoggerFactorySpy loggerFactorySpy;
 
 	private LoggerSpy loggerSpy;
@@ -50,14 +49,14 @@ public class ModuleInitializerTest {
 		LoggerProvider.setLoggerFactory(loggerFactorySpy);
 		factoryClass = InterfaceClassSpy.class;
 
-		initializer = new ModuleInitializer();
+		initializer = new ModuleInitializerImp();
 		loggerSpy = (LoggerSpy) loggerFactorySpy.MCR.getReturnValue("factorForClass", 0);
 		starter = new ModuleStarterSpy();
 		initializer.onlyForTestSetStarter(starter);
 		starter.MRV.setDefaultReturnValuesSupplier(
 				"getImplementationBasedOnSelectOrderThrowErrorIfNone", InterfaceClassSpy::new);
 		starter.MRV.setDefaultReturnValuesSupplier("getImplementationThrowErrorIfNoneOrMoreThanOne",
-				SelectOrderSpy::new);
+				InterfaceClassSpy::new);
 	}
 
 	@Test
@@ -92,7 +91,7 @@ public class ModuleInitializerTest {
 
 	@Test
 	public void testLogMessagesOnStartup_oneImplementation() throws Exception {
-		initializer.loadOnlyExistingImplementation(factoryClass);
+		initializer.loadTheOnlyExistingImplementation(factoryClass);
 
 		String simpleName = factoryClass.getSimpleName();
 		loggerSpy.MCR.assertParameters("logInfoUsingMessage", 0,
@@ -103,8 +102,25 @@ public class ModuleInitializerTest {
 	}
 
 	@Test
+	public void testRecordStorageProviderImplementationsArePassedOnToStarter_oneImplementation() {
+		InterfaceClassSpy loadedImpl = initializer.loadTheOnlyExistingImplementation(factoryClass);
+
+		starter.MCR.assertReturn("getImplementationThrowErrorIfNoneOrMoreThanOne", 0, loadedImpl);
+		String methodName = "getImplementationThrowErrorIfNoneOrMoreThanOne";
+		starter.MCR.assertParameters(methodName, 0);
+		ServiceLoader<?> implementations = (ServiceLoader<?>) starter.MCR
+				.getValueForMethodNameAndCallNumberAndParameterName(methodName, 0,
+						"implementations");
+		assertNotNull(implementations);
+		assertTrue(implementations instanceof ServiceLoader);
+		starter.MCR.assertParameter(methodName, 0, "interfaceClassName",
+				factoryClass.getSimpleName());
+
+	}
+
+	@Test
 	public void testInitUsesDefaultModuleStarter() throws Exception {
-		initializer = new ModuleInitializer();
+		initializer = new ModuleInitializerImp();
 
 		ModuleStarterImp starter = (ModuleStarterImp) initializer.onlyForTestGetStarter();
 
