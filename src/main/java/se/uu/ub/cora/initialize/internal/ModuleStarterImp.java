@@ -25,6 +25,7 @@ import se.uu.ub.cora.logger.Logger;
 import se.uu.ub.cora.logger.LoggerProvider;
 
 public class ModuleStarterImp implements ModuleStarter {
+	private static final int SMALLEST_PREFERENCE_LEVEL = -99999;
 	private Logger log = LoggerProvider.getLoggerForClass(ModuleStarterImp.class);
 
 	@Override
@@ -45,7 +46,7 @@ public class ModuleStarterImp implements ModuleStarter {
 	private <T extends SelectOrder> T findAndLogPreferedImplementation(Iterable<T> implementations,
 			String interfaceClassName) {
 		T implementation = null;
-		int preferenceLevel = -99999;
+		int preferenceLevel = SMALLEST_PREFERENCE_LEVEL;
 		for (T currentImplementation : implementations) {
 			if (preferenceLevel < currentImplementation.getOrderToSelectImplementionsBy()) {
 				preferenceLevel = currentImplementation.getOrderToSelectImplementionsBy();

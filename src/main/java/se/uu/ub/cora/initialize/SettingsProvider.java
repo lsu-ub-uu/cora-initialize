@@ -51,7 +51,7 @@ public class SettingsProvider {
 			return settings.get(name);
 		} catch (Exception e) {
 			throw new InitializationException(
-					"Setting name: " + name + " not found in SettingsProvider.");
+					"Setting name: " + name + " not found in SettingsProvider.", e);
 		}
 	}
 

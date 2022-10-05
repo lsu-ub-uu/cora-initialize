@@ -54,9 +54,22 @@ public class SettingsProviderTest {
 
 	@Test(expectedExceptions = InitializationException.class, expectedExceptionsMessageRegExp = ""
 			+ "Setting name: someName not found in SettingsProvider.")
-	public void testKeyNotFoundIfNotSet() throws Exception {
+	public void testSettingsNameNotFoundIfNotSet() throws Exception {
 		String name = SOME_NAME;
 		SettingsProvider.getSetting(name);
+	}
+
+	@Test
+	public void testThrowExceptionKeepsRootException() throws Exception {
+		String name = SOME_NAME;
+		try {
+			SettingsProvider.getSetting(name);
+			assertTrue(false);
+		} catch (Exception e) {
+			assertTrue(e.getCause() instanceof NullPointerException);
+			assertEquals(e.getCause().getMessage(),
+					"Cannot invoke \"java.util.Map.get(Object)\" because \"se.uu.ub.cora.initialize.SettingsProvider.settings\" is null");
+		}
 	}
 
 	@Test
