@@ -33,8 +33,8 @@ import org.testng.annotations.Test;
 import se.uu.ub.cora.initialize.InitializationException;
 import se.uu.ub.cora.initialize.SelectOrder;
 import se.uu.ub.cora.logger.LoggerProvider;
-import se.uu.ub.cora.testspies.logger.LoggerFactorySpy;
-import se.uu.ub.cora.testspies.logger.LoggerSpy;
+import se.uu.ub.cora.logger.spies.LoggerFactorySpy;
+import se.uu.ub.cora.logger.spies.LoggerSpy;
 
 public class ModuleStarterTest {
 

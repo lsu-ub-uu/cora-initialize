@@ -32,8 +32,8 @@ import se.uu.ub.cora.initialize.internal.ModuleStarter;
 import se.uu.ub.cora.initialize.internal.ModuleStarterImp;
 import se.uu.ub.cora.initialize.internal.ModuleStarterSpy;
 import se.uu.ub.cora.logger.LoggerProvider;
-import se.uu.ub.cora.testspies.logger.LoggerFactorySpy;
-import se.uu.ub.cora.testspies.logger.LoggerSpy;
+import se.uu.ub.cora.logger.spies.LoggerFactorySpy;
+import se.uu.ub.cora.logger.spies.LoggerSpy;
 
 public class ModuleInitializerTest {
 	private ModuleInitializerImp initializer;
