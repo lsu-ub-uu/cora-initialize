@@ -1,6 +1,6 @@
 /*
  * Copyright 2022 Uppsala University Library
- * 
+ *
  * This file is part of Cora.
  *
  *     Cora is free software: you can redistribute it and/or modify
@@ -16,19 +16,23 @@
  *     You should have received a copy of the GNU General Public License
  *     along with Cora.  If not, see <http://www.gnu.org/licenses/>.
  */
-package se.uu.ub.cora.initialize.internal;
+package se.uu.ub.cora.initialize;
 
-/**
- * InterfaceClassSpy is here so that we can test with something that fullfills the uses part of
- * module-info
- *
- */
-// public class InterfaceClassSpy implements SelectOrder {
-public class InterfaceClassSpy implements InterfaceSpy {
+public abstract class AbstractProvider {
 
-	@Override
-	public int getOrderToSelectImplementionsBy() {
-		return 0;
+	protected static ModuleInitializer moduleInitializer = new ModuleInitializerImp();
+
+	protected AbstractProvider() {
+		// prevent call to constructor
+		throw new UnsupportedOperationException();
+	}
+
+	static ModuleInitializer onlyForTestGetModuleInitializer() {
+		return moduleInitializer;
+	}
+
+	public static void onlyForTestSetModuleInitializer(ModuleInitializer moduleInitializer) {
+		AbstractProvider.moduleInitializer = moduleInitializer;
 	}
 
 }

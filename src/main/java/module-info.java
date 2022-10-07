@@ -1,9 +1,9 @@
-import se.uu.ub.cora.initialize.internal.InterfaceClassSpy;
+import se.uu.ub.cora.initialize.internal.InterfaceSpy;
 
 module se.uu.ub.cora.initialize {
 	requires transitive se.uu.ub.cora.logger;
 
-	uses InterfaceClassSpy;
+	uses InterfaceSpy;
 
 	exports se.uu.ub.cora.initialize;
 }

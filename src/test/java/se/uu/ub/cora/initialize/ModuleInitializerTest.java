@@ -28,6 +28,7 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import se.uu.ub.cora.initialize.internal.InterfaceClassSpy;
+import se.uu.ub.cora.initialize.internal.InterfaceSpy;
 import se.uu.ub.cora.initialize.internal.ModuleStarter;
 import se.uu.ub.cora.initialize.internal.ModuleStarterImp;
 import se.uu.ub.cora.initialize.internal.ModuleStarterSpy;
@@ -40,14 +41,16 @@ public class ModuleInitializerTest {
 	private LoggerFactorySpy loggerFactorySpy;
 
 	private LoggerSpy loggerSpy;
-	private Class<InterfaceClassSpy> factoryClass;
+	// private Class<InterfaceClassSpy> factoryClass;
+	private Class<InterfaceSpy> factoryClass;
 	private ModuleStarterSpy starter;
 
 	@BeforeMethod
 	public void beforeMethod() {
 		loggerFactorySpy = new LoggerFactorySpy();
 		LoggerProvider.setLoggerFactory(loggerFactorySpy);
-		factoryClass = InterfaceClassSpy.class;
+		// factoryClass = InterfaceClassSpy.class;
+		factoryClass = InterfaceSpy.class;
 
 		initializer = new ModuleInitializerImp();
 		loggerSpy = (LoggerSpy) loggerFactorySpy.MCR.getReturnValue("factorForClass", 0);
@@ -73,7 +76,8 @@ public class ModuleInitializerTest {
 
 	@Test
 	public void testRecordStorageProviderImplementationsArePassedOnToStarter_selectOrder() {
-		InterfaceClassSpy loadedImpl = initializer.loadOneImplementationBySelectOrder(factoryClass);
+		InterfaceClassSpy loadedImpl = (InterfaceClassSpy) initializer
+				.loadOneImplementationBySelectOrder(factoryClass);
 
 		starter.MCR.assertReturn("getImplementationBasedOnSelectOrderThrowErrorIfNone", 0,
 				loadedImpl);
@@ -103,7 +107,8 @@ public class ModuleInitializerTest {
 
 	@Test
 	public void testRecordStorageProviderImplementationsArePassedOnToStarter_oneImplementation() {
-		InterfaceClassSpy loadedImpl = initializer.loadTheOnlyExistingImplementation(factoryClass);
+		InterfaceClassSpy loadedImpl = (InterfaceClassSpy) initializer
+				.loadTheOnlyExistingImplementation(factoryClass);
 
 		starter.MCR.assertReturn("getImplementationThrowErrorIfNoneOrMoreThanOne", 0, loadedImpl);
 		String methodName = "getImplementationThrowErrorIfNoneOrMoreThanOne";
