@@ -20,6 +20,9 @@ package se.uu.ub.cora.initialize;
 
 import java.util.Map;
 
+import se.uu.ub.cora.logger.Logger;
+import se.uu.ub.cora.logger.LoggerProvider;
+
 /**
  * SettingsProvider contains initialization settings needed to start different parts of a Cora
  * system.
@@ -31,6 +34,7 @@ import java.util.Map;
 public class SettingsProvider {
 
 	private static Map<String, String> settings;
+	private static Logger log = LoggerProvider.getLoggerForClass(SettingsProvider.class);
 
 	private SettingsProvider() {
 		// prevent call to constructor
@@ -48,11 +52,22 @@ public class SettingsProvider {
 	 */
 	public static String getSetting(String name) {
 		try {
-			return settings.get(name);
+			return tryToGetSetting(name);
 		} catch (Exception e) {
-			throw new InitializationException(
-					"Setting name: " + name + " not found in SettingsProvider.", e);
+			log.logFatalUsingMessage(createMessageForName(name));
+			throw new InitializationException(createMessageForName(name), e);
 		}
+	}
+
+	private static String createMessageForName(String name) {
+		return "Setting name: " + name + " not found in SettingsProvider.";
+	}
+
+	private static String tryToGetSetting(String name) {
+		if (settings.containsKey(name)) {
+			return settings.get(name);
+		}
+		throw new InitializationException(createMessageForName(name));
 	}
 
 	/**

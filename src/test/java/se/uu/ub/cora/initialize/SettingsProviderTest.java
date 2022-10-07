@@ -30,12 +30,18 @@ import java.util.Map;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import se.uu.ub.cora.logger.LoggerProvider;
+import se.uu.ub.cora.logger.spies.LoggerFactorySpy;
+import se.uu.ub.cora.logger.spies.LoggerSpy;
+
 public class SettingsProviderTest {
 	private static final String SOME_VALUE = "someValue";
 	private static final String SOME_NAME = "someName";
+	private LoggerFactorySpy loggerFactorySpy = new LoggerFactorySpy();
 
 	@BeforeMethod
 	public void beforeMethod() {
+		LoggerProvider.setLoggerFactory(loggerFactorySpy);
 		SettingsProvider.setSettings(null);
 	}
 
@@ -52,23 +58,48 @@ public class SettingsProviderTest {
 		constructor.newInstance();
 	}
 
+	@Test
+	public void testLoggerStarted() throws Exception {
+		loggerFactorySpy.MCR.assertParameters("factorForClass", 0, SettingsProvider.class);
+	}
+
 	@Test(expectedExceptions = InitializationException.class, expectedExceptionsMessageRegExp = ""
 			+ "Setting name: someName not found in SettingsProvider.")
+	public void testSettingsNameNotFoundIfNotSetSettingsCalled() throws Exception {
+		SettingsProvider.getSetting(SOME_NAME);
+	}
+
+	@Test
 	public void testSettingsNameNotFoundIfNotSet() throws Exception {
-		String name = SOME_NAME;
-		SettingsProvider.getSetting(name);
+		Map<String, String> mapOfInfo = new HashMap<>();
+		SettingsProvider.setSettings(mapOfInfo);
+		try {
+			SettingsProvider.getSetting(SOME_NAME);
+			assertTrue(false);
+		} catch (Exception e) {
+			assertTrue(e.getCause() instanceof InitializationException);
+			assertEquals(e.getMessage(), "Setting name: someName not found in SettingsProvider.");
+			assertErrorIsLogged();
+		}
+	}
+
+	private void assertErrorIsLogged() {
+		LoggerSpy loggerSpy = (LoggerSpy) loggerFactorySpy.MCR.getReturnValue("factorForClass", 0);
+		loggerSpy.MCR.assertParameters("logFatalUsingMessage", 0,
+				"Setting name: someName not found in SettingsProvider.");
 	}
 
 	@Test
 	public void testThrowExceptionKeepsRootException() throws Exception {
-		String name = SOME_NAME;
 		try {
-			SettingsProvider.getSetting(name);
+			SettingsProvider.getSetting(SOME_NAME);
 			assertTrue(false);
 		} catch (Exception e) {
 			assertTrue(e.getCause() instanceof NullPointerException);
 			assertEquals(e.getCause().getMessage(),
-					"Cannot invoke \"java.util.Map.get(Object)\" because \"se.uu.ub.cora.initialize.SettingsProvider.settings\" is null");
+					"Cannot invoke \"java.util.Map.containsKey(Object)\" "
+							+ "because \"se.uu.ub.cora.initialize.SettingsProvider.settings\" is null");
+			assertErrorIsLogged();
 		}
 	}
 
