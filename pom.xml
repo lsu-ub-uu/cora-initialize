@@ -33,9 +33,9 @@
 	
 	<properties>
 		<logger.version>2.5.0</logger.version>
+		<loggerspies.version>1.0-SNAPSHOT</loggerspies.version>
 		<coralog4j.version>2.1.0</coralog4j.version>
 		<testutils.version>1.5.0</testutils.version>
-		<logger-spies.version>1.0-SNAPSHOT</logger-spies.version>
 	</properties>
 	
 	<scm>
@@ -68,7 +68,7 @@
 		<dependency>
 			<groupId>se.uu.ub.cora</groupId>
 			<artifactId>logger-spies</artifactId>
-			<version>${logger-spies.version}</version>
+			<version>${loggerspies.version}</version>
 			<scope>test</scope>
 		</dependency>
 		

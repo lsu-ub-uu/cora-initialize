@@ -65,7 +65,9 @@ public class SettingsProvider {
 
 	private static String tryToGetSetting(String name) {
 		if (settings.containsKey(name)) {
-			return settings.get(name);
+			String value = settings.get(name);
+			log.logInfoUsingMessage("Found: " + value + " as: " + name);
+			return value;
 		}
 		throw new InitializationException(createMessageForName(name));
 	}

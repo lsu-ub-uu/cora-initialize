@@ -108,8 +108,12 @@ public class SettingsProviderTest {
 		Map<String, String> mapOfInfo = new HashMap<>();
 		mapOfInfo.put(SOME_NAME, SOME_VALUE);
 		SettingsProvider.setSettings(mapOfInfo);
+
 		String valueFromInitSetting = SettingsProvider.getSetting(SOME_NAME);
+
 		assertEquals(valueFromInitSetting, SOME_VALUE);
+		LoggerSpy loggerSpy = (LoggerSpy) loggerFactorySpy.MCR.getReturnValue("factorForClass", 0);
+		loggerSpy.MCR.assertParameters("logInfoUsingMessage", 0, "Found: someValue as: someName");
 	}
 
 }
