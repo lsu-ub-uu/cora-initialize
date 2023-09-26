@@ -27,7 +27,7 @@ public abstract class AbstractProvider {
 		throw new UnsupportedOperationException();
 	}
 
-	static ModuleInitializer onlyForTestGetModuleInitializer() {
+	public static ModuleInitializer onlyForTestGetModuleInitializer() {
 		return moduleInitializer;
 	}
 
