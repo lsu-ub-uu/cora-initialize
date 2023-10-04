@@ -28,7 +28,7 @@
 
 	<artifactId>initialize</artifactId>
 	<packaging>jar</packaging>
-	<version>1.5-SNAPSHOT</version>
+	<version>1.5.0-SNAPSHOT</version>
 	<name>Initialize</name>
 	
 	<properties>
@@ -41,7 +41,7 @@
 		<connection>scm:git:https://github.com/lsu-ub-uu/cora-initialize.git</connection>
 		<developerConnection>scm:git:https://github.com/lsu-ub-uu/cora-initialize.git</developerConnection>
 		<url>https://github.com/lsu-ub-uu/cora-initialize.git</url>
-	  <tag>HEAD</tag>
+	  <tag>release/1.5</tag>
   </scm>
 
 	<dependencies>
