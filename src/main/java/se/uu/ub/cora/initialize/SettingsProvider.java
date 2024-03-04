@@ -18,7 +18,9 @@
  */
 package se.uu.ub.cora.initialize;
 
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import se.uu.ub.cora.logger.Logger;
 import se.uu.ub.cora.logger.LoggerProvider;
@@ -35,6 +37,7 @@ public class SettingsProvider {
 
 	private static Map<String, String> settings;
 	private static Logger log = LoggerProvider.getLoggerForClass(SettingsProvider.class);
+	private static Set<String> loggedNames = new HashSet<>();
 
 	private SettingsProvider() {
 		// prevent call to constructor
@@ -59,17 +62,28 @@ public class SettingsProvider {
 		}
 	}
 
-	private static String createMessageForName(String name) {
-		return "Setting name: " + name + " not found in SettingsProvider.";
-	}
-
 	private static String tryToGetSetting(String name) {
 		if (settings.containsKey(name)) {
-			String value = settings.get(name);
-			log.logInfoUsingMessage("Found: " + value + " as: " + name);
-			return value;
+			return getExistingSetting(name);
 		}
 		throw new InitializationException(createMessageForName(name));
+	}
+
+	private static String getExistingSetting(String name) {
+		String value = settings.get(name);
+		logFirstCallForSettingName(name, value);
+		return value;
+	}
+
+	private static void logFirstCallForSettingName(String name, String value) {
+		if (!loggedNames.contains(name)) {
+			log.logInfoUsingMessage("Found: " + value + " as: " + name);
+			loggedNames.add(name);
+		}
+	}
+
+	private static String createMessageForName(String name) {
+		return "Setting name: " + name + " not found in SettingsProvider.";
 	}
 
 	/**

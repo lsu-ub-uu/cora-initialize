@@ -20,6 +20,7 @@ package se.uu.ub.cora.initialize;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.fail;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -75,7 +76,7 @@ public class SettingsProviderTest {
 		SettingsProvider.setSettings(mapOfInfo);
 		try {
 			SettingsProvider.getSetting(SOME_NAME);
-			assertTrue(false);
+			fail("An exception should have been thrown");
 		} catch (Exception e) {
 			assertTrue(e.getCause() instanceof InitializationException);
 			assertEquals(e.getMessage(), "Setting name: someName not found in SettingsProvider.");
@@ -114,6 +115,21 @@ public class SettingsProviderTest {
 		assertEquals(valueFromInitSetting, SOME_VALUE);
 		LoggerSpy loggerSpy = (LoggerSpy) loggerFactorySpy.MCR.getReturnValue("factorForClass", 0);
 		loggerSpy.MCR.assertParameters("logInfoUsingMessage", 0, "Found: someValue as: someName");
+	}
+
+	@Test
+	public void testGetSettingOnlyLogsFirstRequestOfASettingName() throws Exception {
+		LoggerSpy loggerSpy = (LoggerSpy) loggerFactorySpy.MCR.getReturnValue("factorForClass", 0);
+		Map<String, String> mapOfInfo = new HashMap<>();
+		mapOfInfo.put(SOME_NAME, SOME_VALUE);
+		SettingsProvider.setSettings(mapOfInfo);
+
+		SettingsProvider.getSetting(SOME_NAME);
+		SettingsProvider.getSetting(SOME_NAME);
+		SettingsProvider.getSetting(SOME_NAME);
+
+		loggerSpy.MCR.assertParameters("logInfoUsingMessage", 0, "Found: someValue as: someName");
+		loggerSpy.MCR.assertNumberOfCallsToMethod("logInfoUsingMessage", 1);
 	}
 
 }
