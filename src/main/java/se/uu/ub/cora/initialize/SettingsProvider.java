@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Uppsala University Library
+ * Copyright 2022, 2025 Uppsala University Library
  *
  * This file is part of Cora.
  *
@@ -97,4 +97,11 @@ public class SettingsProvider {
 
 	}
 
+	public static void onlyForTestSetLogger(Logger onlyForTestlogger) {
+		log = onlyForTestlogger;
+	}
+
+	public static void onlyForTestClearLoggedNames() {
+		loggedNames = new HashSet<>();
+	}
 }

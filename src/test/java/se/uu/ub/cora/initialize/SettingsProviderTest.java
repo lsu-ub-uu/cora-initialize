@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Uppsala University Library
+ * Copyright 2022, 2025 Uppsala University Library
  *
  * This file is part of Cora.
  *
@@ -28,6 +28,7 @@ import java.lang.reflect.Modifier;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -39,11 +40,23 @@ public class SettingsProviderTest {
 	private static final String SOME_VALUE = "someValue";
 	private static final String SOME_NAME = "someName";
 	private LoggerFactorySpy loggerFactorySpy = new LoggerFactorySpy();
+	private LoggerSpy onlyForTestlogger;
 
 	@BeforeMethod
 	public void beforeMethod() {
 		LoggerProvider.setLoggerFactory(loggerFactorySpy);
+		setOnlyForTestLogger();
+	}
+
+	private void setOnlyForTestLogger() {
+		onlyForTestlogger = new LoggerSpy();
+		SettingsProvider.onlyForTestSetLogger(onlyForTestlogger);
+	}
+
+	@AfterMethod
+	private void afterMeth() {
 		SettingsProvider.setSettings(null);
+		SettingsProvider.onlyForTestClearLoggedNames();
 	}
 
 	@Test
@@ -60,18 +73,18 @@ public class SettingsProviderTest {
 	}
 
 	@Test
-	public void testLoggerStarted() throws Exception {
+	public void testLoggerStarted() {
 		loggerFactorySpy.MCR.assertParameters("factorForClass", 0, SettingsProvider.class);
 	}
 
 	@Test(expectedExceptions = InitializationException.class, expectedExceptionsMessageRegExp = ""
 			+ "Setting name: someName not found in SettingsProvider.")
-	public void testSettingsNameNotFoundIfNotSetSettingsCalled() throws Exception {
+	public void testSettingsNameNotFoundIfNotSetSettingsCalled() {
 		SettingsProvider.getSetting(SOME_NAME);
 	}
 
 	@Test
-	public void testSettingsNameNotFoundIfNotSet() throws Exception {
+	public void testSettingsNameNotFoundIfNotSet() {
 		Map<String, String> mapOfInfo = new HashMap<>();
 		SettingsProvider.setSettings(mapOfInfo);
 		try {
@@ -85,13 +98,12 @@ public class SettingsProviderTest {
 	}
 
 	private void assertErrorIsLogged() {
-		LoggerSpy loggerSpy = (LoggerSpy) loggerFactorySpy.MCR.getReturnValue("factorForClass", 0);
-		loggerSpy.MCR.assertParameters("logFatalUsingMessage", 0,
+		onlyForTestlogger.MCR.assertParameters("logFatalUsingMessage", 0,
 				"Setting name: someName not found in SettingsProvider.");
 	}
 
 	@Test
-	public void testThrowExceptionKeepsRootException() throws Exception {
+	public void testThrowExceptionKeepsRootException() {
 		try {
 			SettingsProvider.getSetting(SOME_NAME);
 			assertTrue(false);
@@ -105,31 +117,33 @@ public class SettingsProviderTest {
 	}
 
 	@Test
-	public void testGetPreviouslySetValue() throws Exception {
-		Map<String, String> mapOfInfo = new HashMap<>();
-		mapOfInfo.put(SOME_NAME, SOME_VALUE);
-		SettingsProvider.setSettings(mapOfInfo);
+	public void testGetPreviouslySetValue() {
+		setOneSetting();
 
 		String valueFromInitSetting = SettingsProvider.getSetting(SOME_NAME);
 
 		assertEquals(valueFromInitSetting, SOME_VALUE);
-		LoggerSpy loggerSpy = (LoggerSpy) loggerFactorySpy.MCR.getReturnValue("factorForClass", 0);
-		loggerSpy.MCR.assertParameters("logInfoUsingMessage", 0, "Found: someValue as: someName");
+		onlyForTestlogger.MCR.assertParameters("logInfoUsingMessage", 0,
+				"Found: someValue as: someName");
 	}
 
-	@Test
-	public void testGetSettingOnlyLogsFirstRequestOfASettingName() throws Exception {
-		LoggerSpy loggerSpy = (LoggerSpy) loggerFactorySpy.MCR.getReturnValue("factorForClass", 0);
+	private void setOneSetting() {
 		Map<String, String> mapOfInfo = new HashMap<>();
 		mapOfInfo.put(SOME_NAME, SOME_VALUE);
 		SettingsProvider.setSettings(mapOfInfo);
-
-		SettingsProvider.getSetting(SOME_NAME);
-		SettingsProvider.getSetting(SOME_NAME);
-		SettingsProvider.getSetting(SOME_NAME);
-
-		loggerSpy.MCR.assertParameters("logInfoUsingMessage", 0, "Found: someValue as: someName");
-		loggerSpy.MCR.assertNumberOfCallsToMethod("logInfoUsingMessage", 1);
 	}
 
+	@Test
+	public void testGetSettingOnlyLogsFirstRequestOfASettingName() {
+		setOneSetting();
+
+		SettingsProvider.getSetting(SOME_NAME);
+		SettingsProvider.getSetting(SOME_NAME);
+		SettingsProvider.getSetting(SOME_NAME);
+
+		onlyForTestlogger.MCR.assertNumberOfCallsToMethod("logInfoUsingMessage", 1);
+		onlyForTestlogger.MCR.assertParameters("logInfoUsingMessage", 0,
+				"Found: someValue as: someName");
+		System.err.println("end");
+	}
 }
