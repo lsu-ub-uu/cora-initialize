@@ -144,6 +144,5 @@ public class SettingsProviderTest {
 		onlyForTestlogger.MCR.assertNumberOfCallsToMethod("logInfoUsingMessage", 1);
 		onlyForTestlogger.MCR.assertParameters("logInfoUsingMessage", 0,
 				"Found: someValue as: someName");
-		System.err.println("end");
 	}
 }
