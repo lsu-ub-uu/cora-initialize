@@ -1,6 +1,6 @@
 /*
  * Copyright 2019 Olov McKie
- * Copyright 2019 Uppsala University Library
+ * Copyright 2019, 2026 Uppsala University Library
  *
  * This file is part of Cora.
  *
@@ -41,7 +41,6 @@ public class ModuleInitializerTest {
 	private LoggerFactorySpy loggerFactorySpy;
 
 	private LoggerSpy loggerSpy;
-	// private Class<InterfaceClassSpy> factoryClass;
 	private Class<InterfaceSpy> factoryClass;
 	private ModuleStarterSpy starter;
 
@@ -49,7 +48,6 @@ public class ModuleInitializerTest {
 	public void beforeMethod() {
 		loggerFactorySpy = new LoggerFactorySpy();
 		LoggerProvider.setLoggerFactory(loggerFactorySpy);
-		// factoryClass = InterfaceClassSpy.class;
 		factoryClass = InterfaceSpy.class;
 
 		initializer = new ModuleInitializerImp();
@@ -63,7 +61,7 @@ public class ModuleInitializerTest {
 	}
 
 	@Test
-	public void testLogMessagesOnStartup_selectOrder() throws Exception {
+	public void testLogMessagesOnStartup_selectOrder() {
 		initializer.loadOneImplementationBySelectOrder(factoryClass);
 
 		String simpleName = factoryClass.getSimpleName();
@@ -84,17 +82,15 @@ public class ModuleInitializerTest {
 		String methodName = "getImplementationBasedOnSelectOrderThrowErrorIfNone";
 		starter.MCR.assertParameters(methodName, 0);
 		ServiceLoader<?> implementations = (ServiceLoader<?>) starter.MCR
-				.getValueForMethodNameAndCallNumberAndParameterName(methodName, 0,
-						"implementations");
+				.getParameterForMethodAndCallNumberAndParameter(methodName, 0, "implementations");
 		assertNotNull(implementations);
 		assertTrue(implementations instanceof ServiceLoader);
 		starter.MCR.assertParameter(methodName, 0, "interfaceClassName",
 				factoryClass.getSimpleName());
-
 	}
 
 	@Test
-	public void testLogMessagesOnStartup_oneImplementation() throws Exception {
+	public void testLogMessagesOnStartup_oneImplementation() {
 		initializer.loadTheOnlyExistingImplementation(factoryClass);
 
 		String simpleName = factoryClass.getSimpleName();
@@ -114,22 +110,49 @@ public class ModuleInitializerTest {
 		String methodName = "getImplementationThrowErrorIfNoneOrMoreThanOne";
 		starter.MCR.assertParameters(methodName, 0);
 		ServiceLoader<?> implementations = (ServiceLoader<?>) starter.MCR
-				.getValueForMethodNameAndCallNumberAndParameterName(methodName, 0,
-						"implementations");
+				.getParameterForMethodAndCallNumberAndParameter(methodName, 0, "implementations");
 		assertNotNull(implementations);
 		assertTrue(implementations instanceof ServiceLoader);
 		starter.MCR.assertParameter(methodName, 0, "interfaceClassName",
 				factoryClass.getSimpleName());
-
 	}
 
 	@Test
-	public void testInitUsesDefaultModuleStarter() throws Exception {
+	public void testLogMessagesOnStartup_selectType() {
+		initializer.loadOneImplementationOfEachType(factoryClass);
+
+		String simpleName = factoryClass.getSimpleName();
+		loggerSpy.MCR.assertParameters("logInfoUsingMessage", 0,
+				"ModuleInitializer start loading implementation of: " + simpleName + "...");
+
+		loggerSpy.MCR.assertParameters("logInfoUsingMessage", 1,
+				"...moduleInitializer finished loading implementation of: " + simpleName);
+	}
+
+	@Test
+	public void testRecordStorageProviderImplementationsArePassedOnToStarter_selectType() {
+		InterfaceClassSpy loadedImpl = (InterfaceClassSpy) initializer
+				.loadOneImplementationOfEachType(factoryClass);
+
+		starter.MCR.assertReturn("getImplementationBasedOnSelectOrderThrowErrorIfNone", 0,
+				loadedImpl);
+		String methodName = "getImplementationBasedOnSelectOrderThrowErrorIfNone";
+		starter.MCR.assertParameters(methodName, 0);
+		ServiceLoader<?> implementations = (ServiceLoader<?>) starter.MCR
+				.getParameterForMethodAndCallNumberAndParameter(methodName, 0, "implementations");
+		assertNotNull(implementations);
+		assertTrue(implementations instanceof ServiceLoader);
+		starter.MCR.assertParameter(methodName, 0, "interfaceClassName",
+				factoryClass.getSimpleName());
+	}
+
+	@Test
+	public void testInitUsesDefaultModuleStarter() {
 		initializer = new ModuleInitializerImp();
 
-		ModuleStarterImp starter = (ModuleStarterImp) initializer.onlyForTestGetStarter();
+		ModuleStarterImp defaultStarter = (ModuleStarterImp) initializer.onlyForTestGetStarter();
 
-		assertStarterIsModuleStarter(starter);
+		assertStarterIsModuleStarter(defaultStarter);
 	}
 
 	private void assertStarterIsModuleStarter(ModuleStarter starter) {
