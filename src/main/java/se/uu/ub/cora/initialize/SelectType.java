@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Uppsala University Library
+ * Copyright 2026 Uppsala University Library
  *
  * This file is part of Cora.
  *
@@ -19,16 +19,14 @@
 package se.uu.ub.cora.initialize;
 
 /**
- * SelectOrder is an interface used to decide which found implementation to use based on an order
- * number.
+ * SelectType is an interface used to decide which found implementation to use based on a type.
  */
-public interface SelectOrder {
+public interface SelectType {
 	/**
-	 * getOrderToSelectImplementionsBy should return an int with the select order of the
-	 * implementing class. A standard implementation should have select order 0, and more
-	 * specialized implementations should have higher values, such as 10, 20, etc.
+	 * getTypeToSelectImplementionsBy should return a String with the select type of the
+	 * implementing class. Returned types are considered the same if one type equals another.
 	 * 
-	 * @return an int with the implementations select order
+	 * @return a String with the implementations select type
 	 */
-	int getOrderToSelectImplementionsBy();
+	String getTypeToSelectImplementionsBy();
 }

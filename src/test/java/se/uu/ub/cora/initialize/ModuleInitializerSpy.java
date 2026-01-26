@@ -18,8 +18,8 @@
  */
 package se.uu.ub.cora.initialize;
 
-import se.uu.ub.cora.initialize.ModuleInitializer;
-import se.uu.ub.cora.initialize.SelectOrder;
+import java.util.Map;
+
 import se.uu.ub.cora.testutils.mcr.MethodCallRecorder;
 import se.uu.ub.cora.testutils.mrv.MethodReturnValues;
 
@@ -32,12 +32,18 @@ public class ModuleInitializerSpy implements ModuleInitializer {
 	}
 
 	@Override
-	public <T extends SelectOrder> T loadOneImplementationBySelectOrder(Class<T> factoryClass) {
-		return (T) MCR.addCallAndReturnFromMRV("factoryClass", factoryClass);
+	public <T extends SelectOrder> T loadOneImplementationBySelectOrder(Class<T> classToLoad) {
+		return (T) MCR.addCallAndReturnFromMRV("classToLoad", classToLoad);
 	}
 
 	@Override
-	public <T> T loadTheOnlyExistingImplementation(Class<T> factoryClass) {
-		return (T) MCR.addCallAndReturnFromMRV("factoryClass", factoryClass);
+	public <T> T loadTheOnlyExistingImplementation(Class<T> classToLoad) {
+		return (T) MCR.addCallAndReturnFromMRV("classToLoad", classToLoad);
+	}
+
+	@Override
+	public <T extends SelectType> Map<String, T> loadOneImplementationOfEachType(
+			Class<T> classToLoad) {
+		return (Map<String, T>) MCR.addCallAndReturnFromMRV("classToLoad", classToLoad);
 	}
 }

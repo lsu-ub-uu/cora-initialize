@@ -18,8 +18,6 @@
  */
 package se.uu.ub.cora.initialize;
 
-import java.util.Map;
-
 import se.uu.ub.cora.initialize.internal.ModuleStarter;
 
 /**
@@ -78,8 +76,10 @@ public interface ModuleInitializer {
 	 *            A found implementation of the specified classToLoad
 	 * @param classToLoad
 	 *            A Class to load
-	 * @return An instance of the specified classToLoad
+	 * @return An {@link ImplementationForTypes} object, with the implementation found for each
+	 *         type.
 	 */
-	<T extends SelectOrder> Map<String, T> loadOneImplementationOfEachType(Class<T> classToLoad);
+	<T extends SelectType> ImplementationForTypes<T> loadOneImplementationOfEachType(
+			Class<T> classToLoad);
 
 }

@@ -31,11 +31,11 @@ public class ModuleInitializerImp implements ModuleInitializer {
 	private ModuleStarter starter = new ModuleStarterImp();
 
 	@Override
-	public <T extends SelectOrder> T loadOneImplementationBySelectOrder(Class<T> factoryClass) {
-		String nameOfClass = factoryClass.getSimpleName();
+	public <T extends SelectOrder> T loadOneImplementationBySelectOrder(Class<T> classToLoad) {
+		String nameOfClass = classToLoad.getSimpleName();
 		logStartMessage(nameOfClass);
 		T loadedImpl = starter.getImplementationBasedOnSelectOrderThrowErrorIfNone(
-				ServiceLoader.load(factoryClass), nameOfClass);
+				ServiceLoader.load(classToLoad), nameOfClass);
 		logFinishedMessage(nameOfClass);
 		return loadedImpl;
 	}
@@ -51,21 +51,22 @@ public class ModuleInitializerImp implements ModuleInitializer {
 	}
 
 	@Override
-	public <T extends Object> T loadTheOnlyExistingImplementation(Class<T> factoryClass) {
-		String nameOfClass = factoryClass.getSimpleName();
+	public <T extends Object> T loadTheOnlyExistingImplementation(Class<T> classToLoad) {
+		String nameOfClass = classToLoad.getSimpleName();
 		logStartMessage(nameOfClass);
 		T loadedImp = starter.getImplementationThrowErrorIfNoneOrMoreThanOne(
-				ServiceLoader.load(factoryClass), nameOfClass);
+				ServiceLoader.load(classToLoad), nameOfClass);
 		logFinishedMessage(nameOfClass);
 		return loadedImp;
 	}
 
-	/**
-	 * onlyForTestSetStarter is only intended to be used in testing
-	 * 
-	 * @param starter
-	 *            A ModuleStarter that returns a test factory
-	 */
+	@Override
+	public <T extends SelectType> ImplementationForTypes<T> loadOneImplementationOfEachType(
+			Class<T> classToLoad) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 	void onlyForTestSetStarter(ModuleStarter starter) {
 		this.starter = starter;
 	}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Uppsala University Library
+ * Copyright 2026 Uppsala University Library
  *
  * This file is part of Cora.
  *
@@ -16,19 +16,24 @@
  *     You should have received a copy of the GNU General Public License
  *     along with Cora.  If not, see <http://www.gnu.org/licenses/>.
  */
-package se.uu.ub.cora.initialize;
+package se.uu.ub.cora.initialize.internal;
 
-/**
- * SelectOrder is an interface used to decide which found implementation to use based on an order
- * number.
- */
-public interface SelectOrder {
-	/**
-	 * getOrderToSelectImplementionsBy should return an int with the select order of the
-	 * implementing class. A standard implementation should have select order 0, and more
-	 * specialized implementations should have higher values, such as 10, 20, etc.
-	 * 
-	 * @return an int with the implementations select order
-	 */
-	int getOrderToSelectImplementionsBy();
+import se.uu.ub.cora.initialize.SelectType;
+import se.uu.ub.cora.testutils.mcr.MethodCallRecorder;
+import se.uu.ub.cora.testutils.mrv.MethodReturnValues;
+
+public class SelectTypeSpy implements SelectType {
+	MethodCallRecorder MCR = new MethodCallRecorder();
+	MethodReturnValues MRV = new MethodReturnValues();
+
+	public SelectTypeSpy() {
+		MCR.useMRV(MRV);
+		MRV.setDefaultReturnValuesSupplier("getOrderToSelectImplementionsBy", () -> "someType");
+	}
+
+	@Override
+	public String getTypeToSelectImplementionsBy() {
+		return (String) MCR.addCallAndReturnFromMRV();
+	}
+
 }
