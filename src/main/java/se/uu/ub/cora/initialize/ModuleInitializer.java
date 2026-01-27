@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Uppsala University Library
+ * Copyright 2022, 2026 Uppsala University Library
  *
  * This file is part of Cora.
  *
@@ -79,7 +79,7 @@ public interface ModuleInitializer {
 	 * @return An {@link ImplementationForTypes} object, with the implementation found for each
 	 *         type.
 	 */
-	<T extends SelectType> ImplementationForTypes<T> loadOneImplementationOfEachType(
+	<T extends SelectType> ImplementationForTypes loadOneImplementationOfEachType(
 			Class<T> classToLoad);
 
 }

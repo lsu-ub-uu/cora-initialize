@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Uppsala University Library
+ * Copyright 2019, 2026 Uppsala University Library
  *
  * This file is part of Cora.
  *
@@ -18,7 +18,9 @@
  */
 package se.uu.ub.cora.initialize.internal;
 
+import se.uu.ub.cora.initialize.ImplementationForTypes;
 import se.uu.ub.cora.initialize.SelectOrder;
+import se.uu.ub.cora.initialize.SelectType;
 import se.uu.ub.cora.testutils.mcr.MethodCallRecorder;
 import se.uu.ub.cora.testutils.mrv.MethodReturnValues;
 
@@ -33,6 +35,9 @@ public class ModuleStarterSpy implements ModuleStarter {
 				SelectOrderSpy::new);
 		MRV.setDefaultReturnValuesSupplier("getImplementationThrowErrorIfNoneOrMoreThanOne",
 				SelectOrderSpy::new);
+		MRV.setDefaultReturnValuesSupplier(
+				"getImplementationBasedOnSelectTypeThrowErrorIfNoneOrMoreThanOneForEachType",
+				ImplementationForTypesSpy::new);
 	}
 
 	@Override
@@ -47,6 +52,13 @@ public class ModuleStarterSpy implements ModuleStarter {
 			String interfaceClassName) {
 		return (T) MCR.addCallAndReturnFromMRV("implementations", implementations,
 				"interfaceClassName", interfaceClassName);
+	}
+
+	@Override
+	public <T extends SelectType> ImplementationForTypes getImplementationBasedOnSelectTypeThrowErrorIfNoneOrMoreThanOneForEachType(
+			Iterable<T> implementations, String interfaceClassName) {
+		return (ImplementationForTypes) MCR.addCallAndReturnFromMRV("implementations",
+				implementations, "interfaceClassName", interfaceClassName);
 	}
 
 }

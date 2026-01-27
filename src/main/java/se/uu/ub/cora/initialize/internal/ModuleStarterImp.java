@@ -19,8 +19,12 @@
  */
 package se.uu.ub.cora.initialize.internal;
 
+import java.util.Map;
+
+import se.uu.ub.cora.initialize.ImplementationForTypes;
 import se.uu.ub.cora.initialize.InitializationException;
 import se.uu.ub.cora.initialize.SelectOrder;
+import se.uu.ub.cora.initialize.SelectType;
 import se.uu.ub.cora.logger.Logger;
 import se.uu.ub.cora.logger.LoggerProvider;
 
@@ -102,4 +106,47 @@ public class ModuleStarterImp implements ModuleStarter {
 		log.logInfoUsingMessage("Found " + currentImplementation.getClass().getName() + " as "
 				+ interfaceClassName + " implementation.");
 	}
+
+	@Override
+	public <T extends SelectType> ImplementationForTypes<?> getImplementationBasedOnSelectTypeThrowErrorIfNoneOrMoreThanOneForEachType(
+			Iterable<T> implementations, String interfaceClassName) {
+		ImplementationForTypesImpl<T> implementationForTypes = new ImplementationForTypesImpl<>();
+		if (hasNoImplementations(implementations)) {
+			throwErrorIfNoImplementationsFound(interfaceClassName);
+		}
+		Map<String, T> map = implementationForTypes.map;
+
+		for (T currentImplementation : implementations) {
+			logFoundClassWithSelectType(interfaceClassName, currentImplementation);
+
+			String currentType = currentImplementation.getTypeToSelectImplementionsBy();
+			if (map.containsKey(currentType)) {
+				String errorMessage = "More than one implementation found for: "
+						+ interfaceClassName + " with type: " + currentType;
+				log.logFatalUsingMessage(errorMessage);
+				throw new InitializationException(errorMessage);
+			}
+			map.put(currentType, currentImplementation);
+		}
+
+		return implementationForTypes;
+	}
+
+	private <T extends SelectType> boolean hasNoImplementations(Iterable<T> implementations) {
+		return !implementations.iterator().hasNext();
+	}
+
+	private void throwErrorIfNoImplementationsFound(String interfaceClassName) {
+		String errorMessage = "No implementations found for: " + interfaceClassName;
+		log.logFatalUsingMessage(errorMessage);
+		throw new InitializationException(errorMessage);
+	}
+
+	private <T extends SelectType> void logFoundClassWithSelectType(String interfaceClassName,
+			T currentImplementation) {
+		log.logInfoUsingMessage("Found " + currentImplementation.getClass().getName() + " as "
+				+ interfaceClassName + " implementation with select type "
+				+ currentImplementation.getTypeToSelectImplementionsBy() + ".");
+	}
+
 }

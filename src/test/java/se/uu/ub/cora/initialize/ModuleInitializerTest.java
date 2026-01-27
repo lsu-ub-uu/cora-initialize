@@ -19,7 +19,6 @@
  */
 package se.uu.ub.cora.initialize;
 
-import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
 
 import java.util.ServiceLoader;
@@ -29,6 +28,7 @@ import org.testng.annotations.Test;
 
 import se.uu.ub.cora.initialize.example.SelectOrderExample;
 import se.uu.ub.cora.initialize.example.SelectOrderImplementationExample;
+import se.uu.ub.cora.initialize.example.SelectTypeExample;
 import se.uu.ub.cora.initialize.internal.ModuleStarter;
 import se.uu.ub.cora.initialize.internal.ModuleStarterImp;
 import se.uu.ub.cora.initialize.internal.ModuleStarterSpy;
@@ -41,30 +41,33 @@ public class ModuleInitializerTest {
 	private LoggerFactorySpy loggerFactorySpy;
 
 	private LoggerSpy loggerSpy;
-	private Class<SelectOrderExample> classToLoad;
+	private Class<SelectOrderExample> classToLoadSelectOrder;
+	private Class<SelectTypeExample> classToLoadSelectType;
 	private ModuleStarterSpy starter;
 
 	@BeforeMethod
 	public void beforeMethod() {
 		loggerFactorySpy = new LoggerFactorySpy();
 		LoggerProvider.setLoggerFactory(loggerFactorySpy);
-		classToLoad = SelectOrderExample.class;
+		classToLoadSelectOrder = SelectOrderExample.class;
+		classToLoadSelectType = SelectTypeExample.class;
 
 		initializer = new ModuleInitializerImp();
 		loggerSpy = (LoggerSpy) loggerFactorySpy.MCR.getReturnValue("factorForClass", 0);
 		starter = new ModuleStarterSpy();
 		initializer.onlyForTestSetStarter(starter);
 		starter.MRV.setDefaultReturnValuesSupplier(
-				"getImplementationBasedOnSelectOrderThrowErrorIfNone", SelectOrderImplementationExample::new);
+				"getImplementationBasedOnSelectOrderThrowErrorIfNone",
+				SelectOrderImplementationExample::new);
 		starter.MRV.setDefaultReturnValuesSupplier("getImplementationThrowErrorIfNoneOrMoreThanOne",
 				SelectOrderImplementationExample::new);
 	}
 
 	@Test
 	public void testLogMessagesOnStartup_selectOrder() {
-		initializer.loadOneImplementationBySelectOrder(classToLoad);
+		initializer.loadOneImplementationBySelectOrder(classToLoadSelectOrder);
 
-		String simpleName = classToLoad.getSimpleName();
+		String simpleName = classToLoadSelectOrder.getSimpleName();
 		loggerSpy.MCR.assertParameters("logInfoUsingMessage", 0,
 				"ModuleInitializer start loading implementation of: " + simpleName + "...");
 
@@ -75,25 +78,17 @@ public class ModuleInitializerTest {
 	@Test
 	public void testRecordStorageProviderImplementationsArePassedOnToStarter_selectOrder() {
 		SelectOrderImplementationExample loadedImpl = (SelectOrderImplementationExample) initializer
-				.loadOneImplementationBySelectOrder(classToLoad);
+				.loadOneImplementationBySelectOrder(classToLoadSelectOrder);
 
-		starter.MCR.assertReturn("getImplementationBasedOnSelectOrderThrowErrorIfNone", 0,
-				loadedImpl);
 		String methodName = "getImplementationBasedOnSelectOrderThrowErrorIfNone";
-		starter.MCR.assertParameters(methodName, 0);
-		ServiceLoader<?> implementations = (ServiceLoader<?>) starter.MCR
-				.getParameterForMethodAndCallNumberAndParameter(methodName, 0, "implementations");
-		assertNotNull(implementations);
-		assertTrue(implementations instanceof ServiceLoader);
-		starter.MCR.assertParameter(methodName, 0, "interfaceClassName",
-				classToLoad.getSimpleName());
+		assertParametersAndReturnForStaterModule(methodName, loadedImpl);
 	}
 
 	@Test
 	public void testLogMessagesOnStartup_oneImplementation() {
-		initializer.loadTheOnlyExistingImplementation(classToLoad);
+		initializer.loadTheOnlyExistingImplementation(classToLoadSelectOrder);
 
-		String simpleName = classToLoad.getSimpleName();
+		String simpleName = classToLoadSelectOrder.getSimpleName();
 		loggerSpy.MCR.assertParameters("logInfoUsingMessage", 0,
 				"ModuleInitializer start loading implementation of: " + simpleName + "...");
 
@@ -104,24 +99,32 @@ public class ModuleInitializerTest {
 	@Test
 	public void testRecordStorageProviderImplementationsArePassedOnToStarter_oneImplementation() {
 		SelectOrderImplementationExample loadedImpl = (SelectOrderImplementationExample) initializer
-				.loadTheOnlyExistingImplementation(classToLoad);
+				.loadTheOnlyExistingImplementation(classToLoadSelectOrder);
 
-		starter.MCR.assertReturn("getImplementationThrowErrorIfNoneOrMoreThanOne", 0, loadedImpl);
 		String methodName = "getImplementationThrowErrorIfNoneOrMoreThanOne";
-		starter.MCR.assertParameters(methodName, 0);
+		assertParametersAndReturnForStaterModule(methodName, loadedImpl);
+
+	}
+
+	private void assertParametersAndReturnForStaterModule(String methodName,
+			Object loadedImplementations) {
+		assertServiceLoaderAsPassedParameter(methodName);
+		starter.MCR.assertParameter(methodName, 0, "interfaceClassName",
+				classToLoadSelectOrder.getSimpleName());
+		starter.MCR.assertReturn(methodName, 0, loadedImplementations);
+	}
+
+	private void assertServiceLoaderAsPassedParameter(String methodName) {
 		ServiceLoader<?> implementations = (ServiceLoader<?>) starter.MCR
 				.getParameterForMethodAndCallNumberAndParameter(methodName, 0, "implementations");
-		assertNotNull(implementations);
 		assertTrue(implementations instanceof ServiceLoader);
-		starter.MCR.assertParameter(methodName, 0, "interfaceClassName",
-				classToLoad.getSimpleName());
 	}
 
 	@Test
 	public void testLogMessagesOnStartup_selectType() {
-		initializer.loadOneImplementationOfEachType(classToLoad);
+		initializer.loadOneImplementationOfEachType(classToLoadSelectType);
 
-		String simpleName = classToLoad.getSimpleName();
+		String simpleName = classToLoadSelectType.getSimpleName();
 		loggerSpy.MCR.assertParameters("logInfoUsingMessage", 0,
 				"ModuleInitializer start loading implementation of: " + simpleName + "...");
 
@@ -131,19 +134,20 @@ public class ModuleInitializerTest {
 
 	@Test
 	public void testRecordStorageProviderImplementationsArePassedOnToStarter_selectType() {
-		SelectOrderImplementationExample loadedImpl = (SelectOrderImplementationExample) initializer
-				.loadOneImplementationOfEachType(classToLoad);
+		ImplementationForTypes loadedImplementations = initializer
+				.loadOneImplementationOfEachType(classToLoadSelectType);
 
-		starter.MCR.assertReturn("getImplementationBasedOnSelectOrderThrowErrorIfNone", 0,
-				loadedImpl);
-		String methodName = "getImplementationBasedOnSelectOrderThrowErrorIfNone";
-		starter.MCR.assertParameters(methodName, 0);
-		ServiceLoader<?> implementations = (ServiceLoader<?>) starter.MCR
-				.getParameterForMethodAndCallNumberAndParameter(methodName, 0, "implementations");
-		assertNotNull(implementations);
-		assertTrue(implementations instanceof ServiceLoader);
+		String methodName = "getImplementationBasedOnSelectTypeThrowErrorIfNoneOrMoreThanOneForEachType";
+		assertParametersAndReturnForStaterModuleForSelectType(methodName, loadedImplementations);
+	}
+
+	private void assertParametersAndReturnForStaterModuleForSelectType(String methodName,
+			Object loadedImplementations) {
+		assertServiceLoaderAsPassedParameter(methodName);
 		starter.MCR.assertParameter(methodName, 0, "interfaceClassName",
-				classToLoad.getSimpleName());
+				classToLoadSelectType.getSimpleName());
+
+		starter.MCR.assertReturn(methodName, 0, loadedImplementations);
 	}
 
 	@Test

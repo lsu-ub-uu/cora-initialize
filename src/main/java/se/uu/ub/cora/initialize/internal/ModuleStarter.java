@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Uppsala University Library
+ * Copyright 2019, 2026 Uppsala University Library
  *
  * This file is part of Cora.
  *
@@ -20,13 +20,15 @@ package se.uu.ub.cora.initialize.internal;
 
 import java.util.ServiceLoader;
 
+import se.uu.ub.cora.initialize.ImplementationForTypes;
 import se.uu.ub.cora.initialize.InitializationException;
 import se.uu.ub.cora.initialize.ModuleInitializerImp;
 import se.uu.ub.cora.initialize.SelectOrder;
+import se.uu.ub.cora.initialize.SelectType;
 
 /**
- * ModuleStarter handles implementations found by {@link ModuleInitializerImp}. It helps to split the
- * part using {@link ServiceLoader} from the part choosing implementations. This split helps in
+ * ModuleStarter handles implementations found by {@link ModuleInitializerImp}. It helps to split
+ * the part using {@link ServiceLoader} from the part choosing implementations. This split helps in
  * testing.
  */
 public interface ModuleStarter {
@@ -41,6 +43,25 @@ public interface ModuleStarter {
 	 * @return
 	 */
 	<T extends SelectOrder> T getImplementationBasedOnSelectOrderThrowErrorIfNone(
+			Iterable<T> implementations, String interfaceClassName);
+
+	/**
+	 * getImplementationBasedOnSelectTypeThrowErrorIfNoneOrMoreThanOneForEachType organize an
+	 * implementation for each type from the given implementation iterable.
+	 * 
+	 * If more than one implementation of a type or no impementations at all are found MUST
+	 * an @throws InitializationException be thrown.
+	 * 
+	 * @param <T>
+	 *            A found implementation of the specified classToLoad
+	 * @param implementations
+	 *            An Iterable with all the implementations for the class to load
+	 * @param interfaceClassName
+	 *            Name of the class to load
+	 * @return An {@link ImplementationForTypes} object, with the implementation found for each
+	 *         type.
+	 */
+	<T extends SelectType> ImplementationForTypes getImplementationBasedOnSelectTypeThrowErrorIfNoneOrMoreThanOneForEachType(
 			Iterable<T> implementations, String interfaceClassName);
 
 	/**

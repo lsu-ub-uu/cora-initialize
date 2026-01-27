@@ -28,7 +28,7 @@ public class SelectTypeSpy implements SelectType {
 
 	public SelectTypeSpy() {
 		MCR.useMRV(MRV);
-		MRV.setDefaultReturnValuesSupplier("getOrderToSelectImplementionsBy", () -> "someType");
+		MRV.setDefaultReturnValuesSupplier("getTypeToSelectImplementionsBy", () -> "someType");
 	}
 
 	@Override

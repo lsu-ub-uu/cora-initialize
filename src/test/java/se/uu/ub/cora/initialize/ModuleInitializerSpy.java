@@ -18,8 +18,6 @@
  */
 package se.uu.ub.cora.initialize;
 
-import java.util.Map;
-
 import se.uu.ub.cora.testutils.mcr.MethodCallRecorder;
 import se.uu.ub.cora.testutils.mrv.MethodReturnValues;
 
@@ -42,8 +40,8 @@ public class ModuleInitializerSpy implements ModuleInitializer {
 	}
 
 	@Override
-	public <T extends SelectType> Map<String, T> loadOneImplementationOfEachType(
+	public <T extends SelectType> ImplementationForTypes loadOneImplementationOfEachType(
 			Class<T> classToLoad) {
-		return (Map<String, T>) MCR.addCallAndReturnFromMRV("classToLoad", classToLoad);
+		return (ImplementationForTypes) MCR.addCallAndReturnFromMRV("classToLoad", classToLoad);
 	}
 }

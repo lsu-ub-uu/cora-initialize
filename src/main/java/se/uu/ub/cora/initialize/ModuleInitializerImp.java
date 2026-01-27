@@ -1,6 +1,6 @@
 /*
  * Copyright 2019 Olov McKie
- * Copyright 2019, 2022 Uppsala University Library
+ * Copyright 2019, 2022, 2026 Uppsala University Library
  *
  * This file is part of Cora.
  *
@@ -61,10 +61,16 @@ public class ModuleInitializerImp implements ModuleInitializer {
 	}
 
 	@Override
-	public <T extends SelectType> ImplementationForTypes<T> loadOneImplementationOfEachType(
+	public <T extends SelectType> ImplementationForTypes loadOneImplementationOfEachType(
 			Class<T> classToLoad) {
-		// TODO Auto-generated method stub
-		return null;
+		String nameOfClass = classToLoad.getSimpleName();
+
+		logStartMessage(nameOfClass);
+		var implementationForTypes = starter
+				.getImplementationBasedOnSelectTypeThrowErrorIfNoneOrMoreThanOneForEachType(
+						ServiceLoader.load(classToLoad), nameOfClass);
+		logFinishedMessage(nameOfClass);
+		return implementationForTypes;
 	}
 
 	void onlyForTestSetStarter(ModuleStarter starter) {

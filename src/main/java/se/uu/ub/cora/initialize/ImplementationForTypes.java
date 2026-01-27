@@ -21,7 +21,7 @@ package se.uu.ub.cora.initialize;
 /**
  * ImplementationForTypes holds one implementation for each type.
  */
-public interface ImplementationForTypes<T> {
+public interface ImplementationForTypes<T extends SelectType> {
 	/**
 	 * getImplementionByType returns the found implementation for the requested type. <br>
 	 * 
@@ -35,5 +35,5 @@ public interface ImplementationForTypes<T> {
 	 *             If the implementation type do not exists should an
 	 *             {@link InitializationException} be thrown.
 	 */
-	<T extends SelectType> T getImplementionByType(String type);
+	T getImplementionByType(String type);
 }
