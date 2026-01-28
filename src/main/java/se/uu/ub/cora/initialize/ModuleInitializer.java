@@ -79,7 +79,7 @@ public interface ModuleInitializer {
 	 * @return An {@link ImplementationForTypes} object, with the implementation found for each
 	 *         type.
 	 */
-	<T extends SelectType> ImplementationForTypes loadOneImplementationOfEachType(
+	<T extends SelectType> ImplementationForTypes<T> loadOneImplementationOfEachType(
 			Class<T> classToLoad);
 
 }

@@ -108,28 +108,55 @@ public class ModuleStarterImp implements ModuleStarter {
 	}
 
 	@Override
-	public <T extends SelectType> ImplementationForTypes<?> getImplementationBasedOnSelectTypeThrowErrorIfNoneOrMoreThanOneForEachType(
+	public <T extends SelectType> ImplementationForTypes<T> getImplementationBasedOnSelectTypeThrowErrorIfNoneOrMoreThanOneForEachType(
 			Iterable<T> implementations, String interfaceClassName) {
-		ImplementationForTypesImpl<T> implementationForTypes = new ImplementationForTypesImpl<>();
+		throwErrorIfNoImplementationsFound(implementations, interfaceClassName);
+		return organizeFoundImplementationsByType(implementations, interfaceClassName);
+	}
+
+	private <T extends SelectType> void throwErrorIfNoImplementationsFound(
+			Iterable<T> implementations, String interfaceClassName) {
 		if (hasNoImplementations(implementations)) {
 			throwErrorIfNoImplementationsFound(interfaceClassName);
 		}
-		Map<String, T> map = implementationForTypes.map;
+	}
 
+	private <T extends SelectType> ImplementationForTypes<T> organizeFoundImplementationsByType(Iterable<T> implementations,
+			String interfaceClassName) {
+		ImplementationForTypesImpl<T> implementationForTypes = new ImplementationForTypesImpl<>();
+		addImplementationsToMapByType(implementationForTypes.map, implementations,
+				interfaceClassName);
+		return implementationForTypes;
+	}
+
+	private <T extends SelectType> void addImplementationsToMapByType(Map<String, T> map,
+			Iterable<T> implementations, String interfaceClassName) {
 		for (T currentImplementation : implementations) {
 			logFoundClassWithSelectType(interfaceClassName, currentImplementation);
-
-			String currentType = currentImplementation.getTypeToSelectImplementionsBy();
-			if (map.containsKey(currentType)) {
-				String errorMessage = "More than one implementation found for: "
-						+ interfaceClassName + " with type: " + currentType;
-				log.logFatalUsingMessage(errorMessage);
-				throw new InitializationException(errorMessage);
-			}
-			map.put(currentType, currentImplementation);
+			addImplementationToMapByType(interfaceClassName, map, currentImplementation);
 		}
+	}
 
-		return implementationForTypes;
+	private <T extends SelectType> void addImplementationToMapByType(String interfaceClassName,
+			Map<String, T> implementationsMap, T currentImplementation) {
+		String currentType = currentImplementation.getTypeToSelectImplementionsBy();
+		if (typeAlreadyExists(implementationsMap, currentType)) {
+			throwExceptionWhenTypeAlreadyExists(interfaceClassName, currentType);
+		}
+		implementationsMap.put(currentType, currentImplementation);
+	}
+
+	private <T extends SelectType> boolean typeAlreadyExists(Map<String, T> map,
+			String currentType) {
+		return map.containsKey(currentType);
+	}
+
+	private void throwExceptionWhenTypeAlreadyExists(String interfaceClassName,
+			String currentType) {
+		String errorMessage = "More than one implementation found for: " + interfaceClassName
+				+ " with type: " + currentType;
+		log.logFatalUsingMessage(errorMessage);
+		throw new InitializationException(errorMessage);
 	}
 
 	private <T extends SelectType> boolean hasNoImplementations(Iterable<T> implementations) {

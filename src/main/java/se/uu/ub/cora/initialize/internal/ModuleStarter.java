@@ -61,7 +61,7 @@ public interface ModuleStarter {
 	 * @return An {@link ImplementationForTypes} object, with the implementation found for each
 	 *         type.
 	 */
-	<T extends SelectType> ImplementationForTypes getImplementationBasedOnSelectTypeThrowErrorIfNoneOrMoreThanOneForEachType(
+	<T extends SelectType> ImplementationForTypes<T> getImplementationBasedOnSelectTypeThrowErrorIfNoneOrMoreThanOneForEachType(
 			Iterable<T> implementations, String interfaceClassName);
 
 	/**
