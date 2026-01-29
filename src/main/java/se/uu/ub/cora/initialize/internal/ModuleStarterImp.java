@@ -21,7 +21,7 @@ package se.uu.ub.cora.initialize.internal;
 
 import java.util.Map;
 
-import se.uu.ub.cora.initialize.ImplementationForTypes;
+import se.uu.ub.cora.initialize.InitializedTypes;
 import se.uu.ub.cora.initialize.InitializationException;
 import se.uu.ub.cora.initialize.SelectOrder;
 import se.uu.ub.cora.initialize.SelectType;
@@ -108,7 +108,7 @@ public class ModuleStarterImp implements ModuleStarter {
 	}
 
 	@Override
-	public <T extends SelectType> ImplementationForTypes<T> getImplementationBasedOnSelectTypeThrowErrorIfNoneOrMoreThanOneForEachType(
+	public <T extends SelectType> InitializedTypes<T> getImplementationBasedOnSelectTypeThrowErrorIfNoneOrMoreThanOneForEachType(
 			Iterable<T> implementations, String interfaceClassName) {
 		throwErrorIfNoImplementationsFound(implementations, interfaceClassName);
 		return organizeFoundImplementationsByType(implementations, interfaceClassName);
@@ -121,7 +121,7 @@ public class ModuleStarterImp implements ModuleStarter {
 		}
 	}
 
-	private <T extends SelectType> ImplementationForTypes<T> organizeFoundImplementationsByType(Iterable<T> implementations,
+	private <T extends SelectType> InitializedTypes<T> organizeFoundImplementationsByType(Iterable<T> implementations,
 			String interfaceClassName) {
 		ImplementationForTypesImpl<T> implementationForTypes = new ImplementationForTypesImpl<>();
 		addImplementationsToMapByType(implementationForTypes.map, implementations,

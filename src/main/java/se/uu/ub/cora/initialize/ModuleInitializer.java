@@ -76,10 +76,10 @@ public interface ModuleInitializer {
 	 *            A found implementation of the specified classToLoad
 	 * @param classToLoad
 	 *            A Class to load
-	 * @return An {@link ImplementationForTypes} object, with the implementation found for each
+	 * @return An {@link InitializedTypes} object, with the implementation found for each
 	 *         type.
 	 */
-	<T extends SelectType> ImplementationForTypes<T> loadOneImplementationOfEachType(
+	<T extends SelectType> InitializedTypes<T> loadOneImplementationOfEachType(
 			Class<T> classToLoad);
 
 }

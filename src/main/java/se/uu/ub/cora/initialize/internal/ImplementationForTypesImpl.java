@@ -21,14 +21,14 @@ package se.uu.ub.cora.initialize.internal;
 import java.util.HashMap;
 import java.util.Map;
 
-import se.uu.ub.cora.initialize.ImplementationForTypes;
+import se.uu.ub.cora.initialize.InitializedTypes;
 import se.uu.ub.cora.initialize.SelectType;
 
-public class ImplementationForTypesImpl<T extends SelectType> implements ImplementationForTypes<T> {
+public class ImplementationForTypesImpl<T extends SelectType> implements InitializedTypes<T> {
 	Map<String, T> map = new HashMap<>();
 
 	@Override
-	public T getImplementionByType(String type) {
+	public T getImplementationByType(String type) {
 		return map.get(type);
 	}
 }

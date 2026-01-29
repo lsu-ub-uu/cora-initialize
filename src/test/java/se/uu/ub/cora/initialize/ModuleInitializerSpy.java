@@ -40,8 +40,8 @@ public class ModuleInitializerSpy implements ModuleInitializer {
 	}
 
 	@Override
-	public <T extends SelectType> ImplementationForTypes loadOneImplementationOfEachType(
+	public <T extends SelectType> InitializedTypes loadOneImplementationOfEachType(
 			Class<T> classToLoad) {
-		return (ImplementationForTypes) MCR.addCallAndReturnFromMRV("classToLoad", classToLoad);
+		return (InitializedTypes) MCR.addCallAndReturnFromMRV("classToLoad", classToLoad);
 	}
 }

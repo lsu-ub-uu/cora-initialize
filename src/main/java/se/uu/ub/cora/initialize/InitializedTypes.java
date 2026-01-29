@@ -16,25 +16,24 @@
  *     You should have received a copy of the GNU General Public License
  *     along with Cora.  If not, see <http://www.gnu.org/licenses/>.
  */
-package se.uu.ub.cora.initialize.internal;
+package se.uu.ub.cora.initialize;
 
-import se.uu.ub.cora.initialize.ImplementationForTypes;
-import se.uu.ub.cora.initialize.SelectType;
-import se.uu.ub.cora.testutils.mcr.MethodCallRecorder;
-import se.uu.ub.cora.testutils.mrv.MethodReturnValues;
-
-public class ImplementationForTypesSpy<T extends SelectType> implements ImplementationForTypes<T> {
-
-	MethodCallRecorder MCR = new MethodCallRecorder();
-	MethodReturnValues MRV = new MethodReturnValues();
-
-	public ImplementationForTypesSpy() {
-		MCR.useMRV(MRV);
-		MRV.setDefaultReturnValuesSupplier("getImplementionByType", SelectTypeSpy::new);
-	}
-
-	@Override
-	public T getImplementionByType(String type) {
-		return (T) MCR.addCallAndReturnFromMRV("type", type);
-	}
+/**
+ * InitializedTypes holds one implementation for each type.
+ */
+public interface InitializedTypes<T extends SelectType> {
+	/**
+	 * getImplementionByType returns the found implementation for the requested type. <br>
+	 * 
+	 * @param <T>
+	 *            An instance of the specified interface (implementation)
+	 * @param type
+	 *            The type to get implementaion for
+	 * @return The found implementation of type T <SelectType>.
+	 * 
+	 * @throws InitializationException
+	 *             If the implementation type do not exists should an
+	 *             {@link InitializationException} be thrown.
+	 */
+	T getImplementationByType(String type);
 }

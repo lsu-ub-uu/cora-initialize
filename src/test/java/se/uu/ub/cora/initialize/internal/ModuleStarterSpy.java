@@ -18,7 +18,7 @@
  */
 package se.uu.ub.cora.initialize.internal;
 
-import se.uu.ub.cora.initialize.ImplementationForTypes;
+import se.uu.ub.cora.initialize.InitializedTypes;
 import se.uu.ub.cora.initialize.SelectOrder;
 import se.uu.ub.cora.initialize.SelectType;
 import se.uu.ub.cora.testutils.mcr.MethodCallRecorder;
@@ -37,7 +37,7 @@ public class ModuleStarterSpy implements ModuleStarter {
 				SelectOrderSpy::new);
 		MRV.setDefaultReturnValuesSupplier(
 				"getImplementationBasedOnSelectTypeThrowErrorIfNoneOrMoreThanOneForEachType",
-				ImplementationForTypesSpy::new);
+				InitializedTypesSpy::new);
 	}
 
 	@Override
@@ -55,9 +55,9 @@ public class ModuleStarterSpy implements ModuleStarter {
 	}
 
 	@Override
-	public <T extends SelectType> ImplementationForTypes getImplementationBasedOnSelectTypeThrowErrorIfNoneOrMoreThanOneForEachType(
+	public <T extends SelectType> InitializedTypes getImplementationBasedOnSelectTypeThrowErrorIfNoneOrMoreThanOneForEachType(
 			Iterable<T> implementations, String interfaceClassName) {
-		return (ImplementationForTypes) MCR.addCallAndReturnFromMRV("implementations",
+		return (InitializedTypes) MCR.addCallAndReturnFromMRV("implementations",
 				implementations, "interfaceClassName", interfaceClassName);
 	}
 

@@ -61,12 +61,12 @@ public class ModuleInitializerImp implements ModuleInitializer {
 	}
 
 	@Override
-	public <T extends SelectType> ImplementationForTypes<T> loadOneImplementationOfEachType(
+	public <T extends SelectType> InitializedTypes<T> loadOneImplementationOfEachType(
 			Class<T> classToLoad) {
 		String nameOfClass = classToLoad.getSimpleName();
 
 		logStartMessage(nameOfClass);
-		ImplementationForTypes<T> implementationForTypes = starter
+		InitializedTypes<T> implementationForTypes = starter
 				.getImplementationBasedOnSelectTypeThrowErrorIfNoneOrMoreThanOneForEachType(
 						ServiceLoader.load(classToLoad), nameOfClass);
 		logFinishedMessage(nameOfClass);

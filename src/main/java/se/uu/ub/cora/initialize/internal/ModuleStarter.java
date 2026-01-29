@@ -20,7 +20,7 @@ package se.uu.ub.cora.initialize.internal;
 
 import java.util.ServiceLoader;
 
-import se.uu.ub.cora.initialize.ImplementationForTypes;
+import se.uu.ub.cora.initialize.InitializedTypes;
 import se.uu.ub.cora.initialize.InitializationException;
 import se.uu.ub.cora.initialize.ModuleInitializerImp;
 import se.uu.ub.cora.initialize.SelectOrder;
@@ -58,10 +58,10 @@ public interface ModuleStarter {
 	 *            An Iterable with all the implementations for the class to load
 	 * @param interfaceClassName
 	 *            Name of the class to load
-	 * @return An {@link ImplementationForTypes} object, with the implementation found for each
+	 * @return An {@link InitializedTypes} object, with the implementation found for each
 	 *         type.
 	 */
-	<T extends SelectType> ImplementationForTypes<T> getImplementationBasedOnSelectTypeThrowErrorIfNoneOrMoreThanOneForEachType(
+	<T extends SelectType> InitializedTypes<T> getImplementationBasedOnSelectTypeThrowErrorIfNoneOrMoreThanOneForEachType(
 			Iterable<T> implementations, String interfaceClassName);
 
 	/**

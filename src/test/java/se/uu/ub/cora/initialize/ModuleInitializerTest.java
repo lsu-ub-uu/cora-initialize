@@ -134,7 +134,7 @@ public class ModuleInitializerTest {
 
 	@Test
 	public void testRecordStorageProviderImplementationsArePassedOnToStarter_selectType() {
-		ImplementationForTypes loadedImplementations = initializer
+		InitializedTypes loadedImplementations = initializer
 				.loadOneImplementationOfEachType(classToLoadSelectType);
 
 		String methodName = "getImplementationBasedOnSelectTypeThrowErrorIfNoneOrMoreThanOneForEachType";

@@ -32,7 +32,7 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
-import se.uu.ub.cora.initialize.ImplementationForTypes;
+import se.uu.ub.cora.initialize.InitializedTypes;
 import se.uu.ub.cora.initialize.InitializationException;
 import se.uu.ub.cora.initialize.SelectOrder;
 import se.uu.ub.cora.initialize.SelectType;
@@ -240,15 +240,15 @@ public class ModuleStarterTest {
 		List<SelectType> implementations = createImplementationsWithType("typeOne", "typeTwo",
 				"typeThree");
 
-		ImplementationForTypes<?> implForTypes = moduleStarter
+		InitializedTypes<?> implForTypes = moduleStarter
 				.getImplementationBasedOnSelectTypeThrowErrorIfNoneOrMoreThanOneForEachType(
 						implementations, SOME_IMPLEMENTING_CLASSNAME);
 
-		SelectType implOne = implForTypes.getImplementionByType("typeOne");
+		SelectType implOne = implForTypes.getImplementationByType("typeOne");
 		assertEquals(implOne.getTypeToSelectImplementionsBy(), "typeOne");
-		SelectType implTwo = implForTypes.getImplementionByType("typeTwo");
+		SelectType implTwo = implForTypes.getImplementationByType("typeTwo");
 		assertEquals(implTwo.getTypeToSelectImplementionsBy(), "typeTwo");
-		SelectType implThree = implForTypes.getImplementionByType("typeThree");
+		SelectType implThree = implForTypes.getImplementationByType("typeThree");
 		assertEquals(implThree.getTypeToSelectImplementionsBy(), "typeThree");
 	}
 
