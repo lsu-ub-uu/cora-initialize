@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Uppsala University Library
+ * Copyright 2026 Uppsala University Library
  *
  * This file is part of Cora.
  *
@@ -19,16 +19,21 @@
 package se.uu.ub.cora.initialize;
 
 /**
- * SelectOrder is an interface used to decide which found implementation to use based on an order
- * number.
+ * InitializedTypes holds one implementation for each type.
  */
-public interface SelectOrder {
+public interface InitializedTypes<T extends SelectType> {
 	/**
-	 * getOrderToSelectImplementionsBy should return an int with the select order of the
-	 * implementing class. A standard implementation should have select order 0, and more
-	 * specialized implementations should have higher values, such as 10, 20, etc.
+	 * getImplementionByType returns the found implementation for the requested type. <br>
 	 * 
-	 * @return an int with the implementations select order
+	 * @param <T>
+	 *            An instance of the specified interface (implementation)
+	 * @param type
+	 *            The type to get implementaion for
+	 * @return The found implementation of type T <SelectType>.
+	 * 
+	 * @throws InitializationException
+	 *             If the implementation type do not exists should an
+	 *             {@link InitializationException} be thrown.
 	 */
-	int getOrderToSelectImplementionsBy();
+	T getImplementationByType(String type);
 }

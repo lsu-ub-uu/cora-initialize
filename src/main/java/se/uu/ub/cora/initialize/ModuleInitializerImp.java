@@ -1,6 +1,6 @@
 /*
  * Copyright 2019 Olov McKie
- * Copyright 2019, 2022 Uppsala University Library
+ * Copyright 2019, 2022, 2026 Uppsala University Library
  *
  * This file is part of Cora.
  *
@@ -31,11 +31,11 @@ public class ModuleInitializerImp implements ModuleInitializer {
 	private ModuleStarter starter = new ModuleStarterImp();
 
 	@Override
-	public <T extends SelectOrder> T loadOneImplementationBySelectOrder(Class<T> factoryClass) {
-		String nameOfClass = factoryClass.getSimpleName();
+	public <T extends SelectOrder> T loadOneImplementationBySelectOrder(Class<T> classToLoad) {
+		String nameOfClass = classToLoad.getSimpleName();
 		logStartMessage(nameOfClass);
 		T loadedImpl = starter.getImplementationBasedOnSelectOrderThrowErrorIfNone(
-				ServiceLoader.load(factoryClass), nameOfClass);
+				ServiceLoader.load(classToLoad), nameOfClass);
 		logFinishedMessage(nameOfClass);
 		return loadedImpl;
 	}
@@ -51,21 +51,28 @@ public class ModuleInitializerImp implements ModuleInitializer {
 	}
 
 	@Override
-	public <T extends Object> T loadTheOnlyExistingImplementation(Class<T> factoryClass) {
-		String nameOfClass = factoryClass.getSimpleName();
+	public <T extends Object> T loadTheOnlyExistingImplementation(Class<T> classToLoad) {
+		String nameOfClass = classToLoad.getSimpleName();
 		logStartMessage(nameOfClass);
 		T loadedImp = starter.getImplementationThrowErrorIfNoneOrMoreThanOne(
-				ServiceLoader.load(factoryClass), nameOfClass);
+				ServiceLoader.load(classToLoad), nameOfClass);
 		logFinishedMessage(nameOfClass);
 		return loadedImp;
 	}
 
-	/**
-	 * onlyForTestSetStarter is only intended to be used in testing
-	 * 
-	 * @param starter
-	 *            A ModuleStarter that returns a test factory
-	 */
+	@Override
+	public <T extends SelectType> InitializedTypes<T> loadOneImplementationOfEachType(
+			Class<T> classToLoad) {
+		String nameOfClass = classToLoad.getSimpleName();
+
+		logStartMessage(nameOfClass);
+		InitializedTypes<T> implementationForTypes = starter
+				.getImplementationBasedOnSelectTypeThrowErrorIfNoneOrMoreThanOneForEachType(
+						ServiceLoader.load(classToLoad), nameOfClass);
+		logFinishedMessage(nameOfClass);
+		return implementationForTypes;
+	}
+
 	void onlyForTestSetStarter(ModuleStarter starter) {
 		this.starter = starter;
 	}
@@ -73,4 +80,5 @@ public class ModuleInitializerImp implements ModuleInitializer {
 	ModuleStarter onlyForTestGetStarter() {
 		return starter;
 	}
+
 }

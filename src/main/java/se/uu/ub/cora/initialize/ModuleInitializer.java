@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Uppsala University Library
+ * Copyright 2022, 2026 Uppsala University Library
  *
  * This file is part of Cora.
  *
@@ -38,31 +38,48 @@ public interface ModuleInitializer {
 
 	/**
 	 * loadOneImplementationBySelectOrder uses javas module system to find and return an
-	 * implementation of the specified factoryClass.
+	 * implementation of the specified classToLoad.
 	 * </p>
 	 * If no implementations can be found MUST an @throws InitializationException be thrown
 	 * 
 	 * @param <T>
-	 *            A found implementation of the specified factoryClass
-	 * @param factoryClass
-	 *            A Class to find
-	 * @return An instance of the specified factoryClass
+	 *            A found implementation of the specified classToLoad
+	 * @param classToLoad
+	 *            A Class to load
+	 * @return An instance of the specified classToLoad
 	 */
-	<T extends SelectOrder> T loadOneImplementationBySelectOrder(Class<T> factoryClass);
+	<T extends SelectOrder> T loadOneImplementationBySelectOrder(Class<T> classToLoad);
 
 	/**
 	 * loadTheOnlyExistingImplementation uses javas module system to find and return an
-	 * implementation of the specified factoryClass.
+	 * implementation of the specified classToLoad.
 	 * 
 	 * If none or more than one implementation is found MUST an @throws InitializationException be
 	 * thrown
 	 * 
 	 * @param <T>
-	 *            A found implementation of the specified factoryClass
-	 * @param factoryClass
-	 *            A Class to find
-	 * @return An instance of the specified factoryClass
+	 *            A found implementation of the specified classToLoad
+	 * @param classToLoad
+	 *            A Class to load
+	 * @return An instance of the specified classToLoad
 	 */
-	<T extends Object> T loadTheOnlyExistingImplementation(Class<T> factoryClass);
+	<T extends Object> T loadTheOnlyExistingImplementation(Class<T> classToLoad);
+
+	/**
+	 * loadOneImplementationOfEachType uses javas module system to find and return an implementation
+	 * of each type of the specified classToLoad.
+	 * 
+	 * If more than one implementation of a type or no impementations at all are found MUST
+	 * an @throws InitializationException be thrown.
+	 * 
+	 * @param <T>
+	 *            A found implementation of the specified classToLoad
+	 * @param classToLoad
+	 *            A Class to load
+	 * @return An {@link InitializedTypes} object, with the implementation found for each
+	 *         type.
+	 */
+	<T extends SelectType> InitializedTypes<T> loadOneImplementationOfEachType(
+			Class<T> classToLoad);
 
 }

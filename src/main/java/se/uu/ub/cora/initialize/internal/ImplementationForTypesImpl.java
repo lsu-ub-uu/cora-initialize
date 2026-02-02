@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Uppsala University Library
+ * Copyright 2026 Uppsala University Library
  *
  * This file is part of Cora.
  *
@@ -18,22 +18,17 @@
  */
 package se.uu.ub.cora.initialize.internal;
 
-import se.uu.ub.cora.initialize.SelectOrder;
-import se.uu.ub.cora.testutils.mcr.MethodCallRecorder;
-import se.uu.ub.cora.testutils.mrv.MethodReturnValues;
+import java.util.HashMap;
+import java.util.Map;
 
-public class SelectOrderSpy implements SelectOrder {
-	MethodCallRecorder MCR = new MethodCallRecorder();
-	MethodReturnValues MRV = new MethodReturnValues();
+import se.uu.ub.cora.initialize.InitializedTypes;
+import se.uu.ub.cora.initialize.SelectType;
 
-	public SelectOrderSpy() {
-		MCR.useMRV(MRV);
-		MRV.setDefaultReturnValuesSupplier("getOrderToSelectImplementionsBy", () -> 0);
-	}
+public class ImplementationForTypesImpl<T extends SelectType> implements InitializedTypes<T> {
+	Map<String, T> map = new HashMap<>();
 
 	@Override
-	public int getOrderToSelectImplementionsBy() {
-		return (int) MCR.addCallAndReturnFromMRV();
+	public T getImplementationByType(String type) {
+		return map.get(type);
 	}
-
 }

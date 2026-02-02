@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Uppsala University Library
+ * Copyright 2026 Uppsala University Library
  * 
  * This file is part of Cora.
  *
@@ -16,19 +16,19 @@
  *     You should have received a copy of the GNU General Public License
  *     along with Cora.  If not, see <http://www.gnu.org/licenses/>.
  */
-package se.uu.ub.cora.initialize.internal;
+package se.uu.ub.cora.initialize.example;
 
 /**
- * InterfaceClassSpy is here so that we can test with something that fullfills the uses part of
- * module-info
+ * SelectTypeImplementationExample is here so that we can test with something that fullfills the
+ * uses part of module-info
  *
  */
-// public class InterfaceClassSpy implements SelectOrder {
-public class InterfaceClassSpy implements InterfaceSpy {
+public class SelectTypeImplementationExample implements SelectTypeExample {
 
 	@Override
-	public int getOrderToSelectImplementionsBy() {
-		return 0;
+	public String getTypeToSelectImplementionsBy() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }

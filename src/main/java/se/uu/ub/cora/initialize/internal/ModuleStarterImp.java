@@ -19,8 +19,12 @@
  */
 package se.uu.ub.cora.initialize.internal;
 
+import java.util.Map;
+
+import se.uu.ub.cora.initialize.InitializedTypes;
 import se.uu.ub.cora.initialize.InitializationException;
 import se.uu.ub.cora.initialize.SelectOrder;
+import se.uu.ub.cora.initialize.SelectType;
 import se.uu.ub.cora.logger.Logger;
 import se.uu.ub.cora.logger.LoggerProvider;
 
@@ -102,4 +106,74 @@ public class ModuleStarterImp implements ModuleStarter {
 		log.logInfoUsingMessage("Found " + currentImplementation.getClass().getName() + " as "
 				+ interfaceClassName + " implementation.");
 	}
+
+	@Override
+	public <T extends SelectType> InitializedTypes<T> getImplementationBasedOnSelectTypeThrowErrorIfNoneOrMoreThanOneForEachType(
+			Iterable<T> implementations, String interfaceClassName) {
+		throwErrorIfNoImplementationsFound(implementations, interfaceClassName);
+		return organizeFoundImplementationsByType(implementations, interfaceClassName);
+	}
+
+	private <T extends SelectType> void throwErrorIfNoImplementationsFound(
+			Iterable<T> implementations, String interfaceClassName) {
+		if (hasNoImplementations(implementations)) {
+			throwErrorIfNoImplementationsFound(interfaceClassName);
+		}
+	}
+
+	private <T extends SelectType> InitializedTypes<T> organizeFoundImplementationsByType(Iterable<T> implementations,
+			String interfaceClassName) {
+		ImplementationForTypesImpl<T> implementationForTypes = new ImplementationForTypesImpl<>();
+		addImplementationsToMapByType(implementationForTypes.map, implementations,
+				interfaceClassName);
+		return implementationForTypes;
+	}
+
+	private <T extends SelectType> void addImplementationsToMapByType(Map<String, T> map,
+			Iterable<T> implementations, String interfaceClassName) {
+		for (T currentImplementation : implementations) {
+			logFoundClassWithSelectType(interfaceClassName, currentImplementation);
+			addImplementationToMapByType(interfaceClassName, map, currentImplementation);
+		}
+	}
+
+	private <T extends SelectType> void addImplementationToMapByType(String interfaceClassName,
+			Map<String, T> implementationsMap, T currentImplementation) {
+		String currentType = currentImplementation.getTypeToSelectImplementionsBy();
+		if (typeAlreadyExists(implementationsMap, currentType)) {
+			throwExceptionWhenTypeAlreadyExists(interfaceClassName, currentType);
+		}
+		implementationsMap.put(currentType, currentImplementation);
+	}
+
+	private <T extends SelectType> boolean typeAlreadyExists(Map<String, T> map,
+			String currentType) {
+		return map.containsKey(currentType);
+	}
+
+	private void throwExceptionWhenTypeAlreadyExists(String interfaceClassName,
+			String currentType) {
+		String errorMessage = "More than one implementation found for: " + interfaceClassName
+				+ " with type: " + currentType;
+		log.logFatalUsingMessage(errorMessage);
+		throw new InitializationException(errorMessage);
+	}
+
+	private <T extends SelectType> boolean hasNoImplementations(Iterable<T> implementations) {
+		return !implementations.iterator().hasNext();
+	}
+
+	private void throwErrorIfNoImplementationsFound(String interfaceClassName) {
+		String errorMessage = "No implementations found for: " + interfaceClassName;
+		log.logFatalUsingMessage(errorMessage);
+		throw new InitializationException(errorMessage);
+	}
+
+	private <T extends SelectType> void logFoundClassWithSelectType(String interfaceClassName,
+			T currentImplementation) {
+		log.logInfoUsingMessage("Found " + currentImplementation.getClass().getName() + " as "
+				+ interfaceClassName + " implementation with select type "
+				+ currentImplementation.getTypeToSelectImplementionsBy() + ".");
+	}
+
 }

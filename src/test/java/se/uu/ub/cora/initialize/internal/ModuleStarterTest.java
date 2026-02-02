@@ -22,22 +22,27 @@ package se.uu.ub.cora.initialize.internal;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertSame;
 import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.fail;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
-import java.util.function.Supplier;
 
 import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
+import se.uu.ub.cora.initialize.InitializedTypes;
 import se.uu.ub.cora.initialize.InitializationException;
 import se.uu.ub.cora.initialize.SelectOrder;
+import se.uu.ub.cora.initialize.SelectType;
 import se.uu.ub.cora.logger.LoggerProvider;
 import se.uu.ub.cora.logger.spies.LoggerFactorySpy;
 import se.uu.ub.cora.logger.spies.LoggerSpy;
 
 public class ModuleStarterTest {
 
+	private static final String SOME_IMPLEMENTING_CLASSNAME = "someImplementingClassname";
 	private LoggerFactorySpy loggerFactorySpy;
 	private LoggerSpy loggerSpy;
 	private ModuleStarter moduleStarter;
@@ -52,38 +57,58 @@ public class ModuleStarterTest {
 	}
 
 	@Test
-	public void testLoggerCreated() throws Exception {
+	public void testLoggerCreated() {
 		loggerFactorySpy.MCR.assertParameters("factorForClass", 0, ModuleStarterImp.class);
 	}
 
-	@Test
-	public void testNoImplementationsFound() throws Exception {
-		Iterable<SelectOrder> implementations = new ArrayList<>();
-		String interfaceClassName = "someImplementingClassname";
+	@DataProvider(name = "noImplementationsFoundData")
+	public Object[][] noImplementationsFoundData() {
+
+		Runnable getImplementationThrowErrorIfNoneOrMoreThanOne = () -> moduleStarter
+				.getImplementationThrowErrorIfNoneOrMoreThanOne(Collections.emptyList(),
+						SOME_IMPLEMENTING_CLASSNAME);
+
+		Runnable getImplementationBasedOnSelectOrderThrowErrorIfNone = () -> moduleStarter
+				.getImplementationBasedOnSelectOrderThrowErrorIfNone(Collections.emptyList(),
+						SOME_IMPLEMENTING_CLASSNAME);
+
+		Runnable getImplementationBasedOnSelectTypeThrowErrorIfNoneOrMoreThanOneForEachType = () -> moduleStarter
+				.getImplementationBasedOnSelectTypeThrowErrorIfNoneOrMoreThanOneForEachType(
+						Collections.emptyList(), SOME_IMPLEMENTING_CLASSNAME);
+
+		return new Object[][] {
+				{ getImplementationThrowErrorIfNoneOrMoreThanOne, SOME_IMPLEMENTING_CLASSNAME },
+				{ getImplementationBasedOnSelectOrderThrowErrorIfNone,
+						SOME_IMPLEMENTING_CLASSNAME },
+				{ getImplementationBasedOnSelectTypeThrowErrorIfNoneOrMoreThanOneForEachType,
+						SOME_IMPLEMENTING_CLASSNAME }, };
+	}
+
+	@Test(dataProvider = "noImplementationsFoundData")
+	public void testNoImplementationsFound(Runnable loader, String interfaceClassName) {
 		try {
-
-			moduleStarter.getImplementationBasedOnSelectOrderThrowErrorIfNone(implementations,
-					interfaceClassName);
-
-			assertTrue(false);
+			loader.run();
+			fail();
 		} catch (Exception e) {
-			assertTrue(e instanceof InitializationException);
-			String errorMessage = "No implementations found for: someImplementingClassname";
-			assertEquals(e.getMessage(), errorMessage);
+			assertTrue(e instanceof InitializationException,
+					"Expected exception to be of type InitializationException");
+
+			String errorMessage = "No implementations found for: " + interfaceClassName;
+			assertEquals(e.getMessage(), errorMessage, "Exception message did not match expected");
+
 			loggerSpy.MCR.assertParameters("logFatalUsingMessage", 0, errorMessage);
 		}
 	}
 
 	@Test
-	public void testOneImplementation() throws Exception {
+	public void testOneImplementation() {
 		List<SelectOrder> implementations = new ArrayList<>();
-		String interfaceClassName = "someImplementingClassname";
 		SelectOrderSpy implementationOne = new SelectOrderSpy();
 		implementations.add(implementationOne);
 
 		SelectOrder startedImplementation = moduleStarter
 				.getImplementationBasedOnSelectOrderThrowErrorIfNone(implementations,
-						interfaceClassName);
+						SOME_IMPLEMENTING_CLASSNAME);
 
 		loggerSpy.MCR.assertParameters("logInfoUsingMessage", 0,
 				"Found se.uu.ub.cora.initialize.internal.SelectOrderSpy as "
@@ -95,13 +120,11 @@ public class ModuleStarterTest {
 	}
 
 	@Test
-	public void testThreeImplementations() throws Exception {
-		List<SelectOrder> implementations = createListOfThreeImplementationsWithOrderZeroTwoOne();
-		String interfaceClassName = "someImplementingClassname";
-
+	public void testThreeImplementations() {
+		List<SelectOrder> implementations = createImplementationsWithOrder(0, 2, 1);
 		SelectOrder startedImplementation = moduleStarter
 				.getImplementationBasedOnSelectOrderThrowErrorIfNone(implementations,
-						interfaceClassName);
+						SOME_IMPLEMENTING_CLASSNAME);
 
 		loggerSpy.MCR.assertParameters("logInfoUsingMessage", 0,
 				"Found se.uu.ub.cora.initialize.internal.SelectOrderSpy as "
@@ -118,50 +141,47 @@ public class ModuleStarterTest {
 						+ "implementation.");
 	}
 
-	private List<SelectOrder> createListOfThreeImplementationsWithOrderZeroTwoOne() {
-		SelectOrderSpy implementationZero = new SelectOrderSpy();
-		SelectOrderSpy implementationOne = new SelectOrderSpy();
-		implementationOne.MRV.setDefaultReturnValuesSupplier("getOrderToSelectImplementionsBy",
-				(Supplier<Integer>) () -> 1);
-		SelectOrderSpy implementationTwo = new SelectOrderSpy();
-		implementationTwo.MRV.setDefaultReturnValuesSupplier("getOrderToSelectImplementionsBy",
-				(Supplier<Integer>) () -> 2);
-
+	private List<SelectOrder> createImplementationsWithOrder(int... orders) {
 		List<SelectOrder> implementations = new ArrayList<>();
-		implementations.add(implementationZero);
-		implementations.add(implementationTwo);
-		implementations.add(implementationOne);
+		for (int order : orders) {
+			SelectOrderSpy implementation = createSelectOrderImplementation(order);
+			implementations.add(implementation);
+		}
 		return implementations;
 	}
 
-	@Test
-	public void testNoImplementationsFound_onlyOne() throws Exception {
-		Iterable<SelectOrder> implementations = new ArrayList<>();
-		String interfaceClassName = "someImplementingClassname";
-		try {
+	private SelectOrderSpy createSelectOrderImplementation(int order) {
+		SelectOrderSpy implementation = new SelectOrderSpy();
+		implementation.MRV.setDefaultReturnValuesSupplier("getOrderToSelectImplementionsBy",
+				() -> order);
+		return implementation;
+	}
 
-			moduleStarter.getImplementationThrowErrorIfNoneOrMoreThanOne(implementations,
-					interfaceClassName);
-
-			assertTrue(false);
-		} catch (Exception e) {
-			assertTrue(e instanceof InitializationException);
-			String errorMessage = "No implementations found for: someImplementingClassname";
-			assertEquals(e.getMessage(), errorMessage);
-			loggerSpy.MCR.assertParameters("logFatalUsingMessage", 0, errorMessage);
+	private List<SelectType> createImplementationsWithType(String... types) {
+		List<SelectType> implementations = new ArrayList<>();
+		for (String type : types) {
+			SelectTypeSpy implementation = createSelectTypeImplementation(type);
+			implementations.add(implementation);
 		}
+		return implementations;
+	}
+
+	private SelectTypeSpy createSelectTypeImplementation(String type) {
+		SelectTypeSpy implementation = new SelectTypeSpy();
+		implementation.MRV.setDefaultReturnValuesSupplier("getTypeToSelectImplementionsBy",
+				() -> type);
+		return implementation;
 	}
 
 	@Test
-	public void testOneImplementation_onlyOne() throws Exception {
+	public void testOneImplementation_onlyOne() {
 		List<SelectOrder> implementations = new ArrayList<>();
-		String interfaceClassName = "someImplementingClassname";
 		SelectOrderSpy implementationOne = new SelectOrderSpy();
 		implementations.add(implementationOne);
 
 		SelectOrder startedImplementation = moduleStarter
 				.getImplementationThrowErrorIfNoneOrMoreThanOne(implementations,
-						interfaceClassName);
+						SOME_IMPLEMENTING_CLASSNAME);
 
 		assertSame(startedImplementation, implementationOne);
 		loggerSpy.MCR.assertParameters("logInfoUsingMessage", 0,
@@ -173,14 +193,12 @@ public class ModuleStarterTest {
 	}
 
 	@Test
-	public void testThreeImplementations_onlyOne() throws Exception {
-		List<SelectOrder> implementations = createListOfThreeImplementationsWithOrderZeroTwoOne();
-		String interfaceClassName = "someImplementingClassname";
+	public void testThreeImplementations_onlyOne() {
+		List<SelectOrder> implementations = createImplementationsWithOrder(0, 2, 1);
 		try {
-
 			moduleStarter.getImplementationThrowErrorIfNoneOrMoreThanOne(implementations,
-					interfaceClassName);
-			assertTrue(false);
+					SOME_IMPLEMENTING_CLASSNAME);
+			fail();
 		} catch (Exception e) {
 			assertTrue(e instanceof InitializationException);
 			String errorMessage = "More than one implementation found for: someImplementingClassname";
@@ -196,5 +214,59 @@ public class ModuleStarterTest {
 		loggerSpy.MCR.assertParameters("logInfoUsingMessage", 2,
 				"Found se.uu.ub.cora.initialize.internal.SelectOrderSpy as "
 						+ "someImplementingClassname implementation.");
+	}
+
+	@Test
+	public void testFindImplForEachTypeLogs_ThreeOfEachType() {
+		List<SelectType> implementations = createImplementationsWithType("typeOne", "typeTwo",
+				"typeThree");
+
+		moduleStarter.getImplementationBasedOnSelectTypeThrowErrorIfNoneOrMoreThanOneForEachType(
+				implementations, SOME_IMPLEMENTING_CLASSNAME);
+
+		loggerSpy.MCR.assertParameters("logInfoUsingMessage", 0,
+				"Found se.uu.ub.cora.initialize.internal.SelectTypeSpy as "
+						+ "someImplementingClassname implementation with select type typeOne.");
+		loggerSpy.MCR.assertParameters("logInfoUsingMessage", 1,
+				"Found se.uu.ub.cora.initialize.internal.SelectTypeSpy as "
+						+ "someImplementingClassname implementation with select type typeTwo.");
+		loggerSpy.MCR.assertParameters("logInfoUsingMessage", 2,
+				"Found se.uu.ub.cora.initialize.internal.SelectTypeSpy as "
+						+ "someImplementingClassname implementation with select type typeThree.");
+	}
+
+	@Test
+	public void testFindImplForEachTypeCheckReturn_ThreeOfEachType() {
+		List<SelectType> implementations = createImplementationsWithType("typeOne", "typeTwo",
+				"typeThree");
+
+		InitializedTypes<?> implForTypes = moduleStarter
+				.getImplementationBasedOnSelectTypeThrowErrorIfNoneOrMoreThanOneForEachType(
+						implementations, SOME_IMPLEMENTING_CLASSNAME);
+
+		SelectType implOne = implForTypes.getImplementationByType("typeOne");
+		assertEquals(implOne.getTypeToSelectImplementionsBy(), "typeOne");
+		SelectType implTwo = implForTypes.getImplementationByType("typeTwo");
+		assertEquals(implTwo.getTypeToSelectImplementionsBy(), "typeTwo");
+		SelectType implThree = implForTypes.getImplementationByType("typeThree");
+		assertEquals(implThree.getTypeToSelectImplementionsBy(), "typeThree");
+	}
+
+	@Test
+	public void testImplementations_onlyOneOfEachType() {
+		List<SelectType> implementations = createImplementationsWithType("typeOne", "typeTwo",
+				"typeTwo");
+		try {
+			moduleStarter
+					.getImplementationBasedOnSelectTypeThrowErrorIfNoneOrMoreThanOneForEachType(
+							implementations, SOME_IMPLEMENTING_CLASSNAME);
+			fail();
+		} catch (Exception e) {
+			assertTrue(e instanceof InitializationException);
+			String errorMessage = "More than one implementation found for: "
+					+ "someImplementingClassname with type: typeTwo";
+			assertEquals(e.getMessage(), errorMessage);
+			loggerSpy.MCR.assertParameters("logFatalUsingMessage", 0, errorMessage);
+		}
 	}
 }
